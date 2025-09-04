@@ -1,6 +1,6 @@
 'use client';
 
-import { useRequireAdmin } from '@/hooks/useAdminAuth';
+import { useRequireAdmin } from '../../hooks/useAdminAuth';
 
 interface AdminProtectedRouteProps {
   children: React.ReactNode;

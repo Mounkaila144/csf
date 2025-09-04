@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AdminProduct, ProductFormData, AdminCategory, AdminSubcategory } from '@/types';
-import { adminService } from '@/services/adminService';
+import { AdminProduct, ProductFormData, AdminCategory, AdminSubcategory } from '../../types';
+import { adminService } from '../../services/adminService';
 
 interface ProductFormProps {
   product?: AdminProduct;

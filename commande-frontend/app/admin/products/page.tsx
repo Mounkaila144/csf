@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import ProductTable from '@/components/admin/ProductTable';
-import ProductForm from '@/components/admin/ProductForm';
-import Pagination from '@/components/admin/Pagination';
-import { adminService } from '@/services/adminService';
-import { AdminProduct, ProductFormData, AdminCategory, PaginationMeta, AdminFilters } from '@/types';
+import AdminLayout from '../../../src/components/admin/AdminLayout';
+import ProductTable from '../../../src/components/admin/ProductTable';
+import ProductForm from '../../../src/components/admin/ProductForm';
+import Pagination from '../../../src/components/admin/Pagination';
+import { adminService } from '../../../src/services/adminService';
+import { AdminProduct, ProductFormData, AdminCategory, PaginationMeta, AdminFilters } from '../../../src/types';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<AdminProduct[]>([]);

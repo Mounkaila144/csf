@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AdminCategory } from '@/types';
+import { AdminCategory } from '../../types';
 
 interface CategoryTableProps {
   categories: AdminCategory[];

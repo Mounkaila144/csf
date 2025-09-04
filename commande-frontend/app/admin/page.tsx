@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import { adminService } from '@/services/adminService';
+import AdminLayout from '../../src/components/admin/AdminLayout';
+import { adminService } from '../../src/services/adminService';
 
 interface DashboardStats {
   totalCategories: number;

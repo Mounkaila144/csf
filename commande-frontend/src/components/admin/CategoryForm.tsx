@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AdminCategory, CategoryFormData } from '@/types';
+import { AdminCategory, CategoryFormData } from '../../types';
 
 interface CategoryFormProps {
   category?: AdminCategory;

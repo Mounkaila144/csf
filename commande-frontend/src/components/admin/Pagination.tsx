@@ -1,6 +1,6 @@
 'use client';
 
-import { PaginationMeta } from '@/types';
+import { PaginationMeta } from '../../types';
 
 interface PaginationProps {
   meta: PaginationMeta;

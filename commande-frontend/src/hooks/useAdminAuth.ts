@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService, User } from '@/services/authService';
+import { authService, User } from '../services/authService';
 
 interface UseAdminAuthReturn {
   user: User | null;

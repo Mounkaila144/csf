@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { authService } from '@/services/authService';
-import { useRequireAdmin } from '@/hooks/useAdminAuth';
+import { authService } from '../../services/authService';
+import { useRequireAdmin } from '../../hooks/useAdminAuth';
 import AdminProtectedRoute from './AdminProtectedRoute';
 
 interface AdminLayoutProps {

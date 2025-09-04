@@ -1,6 +1,6 @@
 'use client';
 
-import { ToastContainer, useToast } from '@/components/admin/Toast';
+import { ToastContainer, useToast } from '../../src/components/admin/Toast';
 import { createContext, useContext } from 'react';
 
 // Contexte pour les toasts

@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import CategoryTable from '@/components/admin/CategoryTable';
-import CategoryForm from '@/components/admin/CategoryForm';
-import Pagination from '@/components/admin/Pagination';
-import { adminService } from '@/services/adminService';
-import { AdminCategory, CategoryFormData, PaginationMeta } from '@/types';
+import AdminLayout from '../../../src/components/admin/AdminLayout';
+import CategoryTable from '../../../src/components/admin/CategoryTable';
+import CategoryForm from '../../../src/components/admin/CategoryForm';
+import Pagination from '../../../src/components/admin/Pagination';
+import { adminService } from '../../../src/services/adminService';
+import { AdminCategory, CategoryFormData, PaginationMeta } from '../../../src/types';
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<AdminCategory[]>([]);
