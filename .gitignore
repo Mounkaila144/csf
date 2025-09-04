@@ -1,0 +1,164 @@
+# ===========================================
+# GITIGNORE POUR PROJET LARAVEL + NEXT.JS
+# ===========================================
+
+# ===========================================
+# LARAVEL BACKEND (commande-backend/)
+# ===========================================
+
+# Dependencies
+commande-backend/vendor/
+commande-backend/node_modules/
+
+# Environment files
+commande-backend/.env
+commande-backend/.env.local
+commande-backend/.env.*.local
+
+# Laravel specific
+commande-backend/storage/*.key
+commande-backend/storage/app/public/*
+commande-backend/storage/framework/cache/*
+commande-backend/storage/framework/sessions/*
+commande-backend/storage/framework/testing/*
+commande-backend/storage/framework/views/*
+commande-backend/storage/logs/*
+commande-backend/bootstrap/cache/*
+
+# Laravel Mix / Vite
+commande-backend/public/hot
+commande-backend/public/storage
+commande-backend/public/build/
+commande-backend/public/mix-manifest.json
+
+# IDE files
+commande-backend/.vscode/
+commande-backend/.idea/
+commande-backend/*.swp
+commande-backend/*.swo
+
+# OS generated files
+commande-backend/.DS_Store
+commande-backend/.DS_Store?
+commande-backend/._*
+commande-backend/.Spotlight-V100
+commande-backend/.Trashes
+commande-backend/ehthumbs.db
+commande-backend/Thumbs.db
+
+# ===========================================
+# NEXT.JS FRONTEND (commande-frontend/)
+# ===========================================
+
+# Dependencies
+commande-frontend/node_modules/
+commande-frontend/.pnp
+commande-frontend/.pnp.js
+
+# Testing
+commande-frontend/coverage/
+
+# Next.js
+commande-frontend/.next/
+commande-frontend/out/
+commande-frontend/build/
+commande-frontend/dist/
+
+# Environment files
+commande-frontend/.env
+commande-frontend/.env.local
+commande-frontend/.env.development.local
+commande-frontend/.env.test.local
+commande-frontend/.env.production.local
+
+# Vercel
+commande-frontend/.vercel
+
+# TypeScript
+commande-frontend/*.tsbuildinfo
+commande-frontend/next-env.d.ts
+
+# IDE files
+commande-frontend/.vscode/
+commande-frontend/.idea/
+commande-frontend/*.swp
+commande-frontend/*.swo
+
+# OS generated files
+commande-frontend/.DS_Store
+commande-frontend/.DS_Store?
+commande-frontend/._*
+commande-frontend/.Spotlight-V100
+commande-frontend/.Trashes
+commande-frontend/ehthumbs.db
+commande-frontend/Thumbs.db
+
+# ===========================================
+# GLOBAL (RACINE DU PROJET)
+# ===========================================
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
