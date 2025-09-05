@@ -8,6 +8,7 @@ interface CategoryTableProps {
   onEdit: (category: AdminCategory) => void;
   onDelete: (id: number) => void;
   onStatusChange: (id: number, status: 'active' | 'inactive') => void;
+  onManageSubcategories: (category: AdminCategory) => void;
   isLoading?: boolean;
 }
 
@@ -16,6 +17,7 @@ export default function CategoryTable({
   onEdit,
   onDelete,
   onStatusChange,
+  onManageSubcategories,
   isLoading = false
 }: CategoryTableProps) {
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -84,6 +86,9 @@ export default function CategoryTable({
                 Statut
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Sous-catégories
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Produits
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -108,18 +113,28 @@ export default function CategoryTable({
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <select
-                    value={category.status}
-                    onChange={(e) => onStatusChange(category.id, e.target.value as 'active' | 'inactive')}
-                    className={`text-xs px-2 py-1 rounded-full border-0 focus:ring-2 focus:ring-blue-500 ${
-                      category.status === 'active'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                  <button
+                    onClick={() => onStatusChange(category.id, category.is_active ? 'inactive' : 'active')}
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
+                      category.is_active
+                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                        : 'bg-red-100 text-red-800 hover:bg-red-200'
                     }`}
                   >
-                    <option value="active">Actif</option>
-                    <option value="inactive">Inactif</option>
-                  </select>
+                    {category.is_active ? 'Actif' : 'Inactif'}
+                  </button>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <button
+                    onClick={() => onManageSubcategories(category)}
+                    className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors"
+                    title="Gérer les sous-catégories"
+                  >
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                    Gérer
+                  </button>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {category.products_count || 0}

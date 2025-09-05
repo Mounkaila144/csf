@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../../src/components/admin/AdminLayout';
-import CategoryTable from '../../../src/components/admin/CategoryTable';
-import CategoryForm from '../../../src/components/admin/CategoryForm';
+import SubcategoryTable from '../../../src/components/admin/SubcategoryTable';
+import SubcategoryForm from '../../../src/components/admin/SubcategoryForm';
 import Pagination from '../../../src/components/admin/Pagination';
-import SubcategoriesModal from '../../../src/components/admin/SubcategoriesModal';
 import { adminService } from '../../../src/services/adminService';
-import { AdminCategory, CategoryFormData, PaginationMeta } from '../../../src/types';
+import { AdminSubcategory, SubcategoryFormData, PaginationMeta, AdminCategory } from '../../../src/types';
 
-export default function CategoriesPage() {
+export default function SubcategoriesPage() {
+  const [subcategories, setSubcategories] = useState<AdminSubcategory[]>([]);
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>({
     current_page: 1,
@@ -21,59 +21,69 @@ export default function CategoriesPage() {
   });
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<AdminCategory | undefined>();
+  const [editingSubcategory, setEditingSubcategory] = useState<AdminSubcategory | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  const [selectedCategoryForSubcategories, setSelectedCategoryForSubcategories] = useState<AdminCategory | null>(null);
-  const [showSubcategoriesModal, setShowSubcategoriesModal] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<number | 'all'>('all');
 
   useEffect(() => {
+    loadSubcategories();
     loadCategories();
-  }, [meta?.current_page, searchTerm, statusFilter]);
+  }, [meta?.current_page, searchTerm, statusFilter, categoryFilter]);
 
-  const loadCategories = async () => {
+  const loadSubcategories = async () => {
     try {
       setLoading(true);
-      const response = await adminService.getCategories(meta?.current_page || 1, meta?.per_page || 10);
-      setCategories(response.data);
+      const filters = categoryFilter !== 'all' ? { category_id: categoryFilter } : {};
+      const response = await adminService.getSubcategories(meta?.current_page || 1, meta?.per_page || 10, categoryFilter !== 'all' ? Number(categoryFilter) : undefined);
+      setSubcategories(response.data);
       setMeta(response.meta);
     } catch (error) {
-      console.error('Erreur lors du chargement des catégories:', error);
+      console.error('Erreur lors du chargement des sous-catégories:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateCategory = async (data: CategoryFormData) => {
+  const loadCategories = async () => {
     try {
-      await adminService.createCategory(data);
+      const response = await adminService.getCategories(1, 100); // Get all categories
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Erreur lors du chargement des catégories:', error);
+    }
+  };
+
+  const handleCreateSubcategory = async (data: SubcategoryFormData) => {
+    try {
+      await adminService.createSubcategory(data);
       setShowForm(false);
-      setEditingCategory(undefined);
-      await loadCategories();
+      setEditingSubcategory(undefined);
+      await loadSubcategories();
     } catch (error) {
       console.error('Erreur lors de la création:', error);
       throw error;
     }
   };
 
-  const handleUpdateCategory = async (data: CategoryFormData) => {
-    if (!editingCategory) return;
+  const handleUpdateSubcategory = async (data: SubcategoryFormData) => {
+    if (!editingSubcategory) return;
     
     try {
-      await adminService.updateCategory(editingCategory.id, data);
+      await adminService.updateSubcategory(editingSubcategory.id, data);
       setShowForm(false);
-      setEditingCategory(undefined);
-      await loadCategories();
+      setEditingSubcategory(undefined);
+      await loadSubcategories();
     } catch (error) {
       console.error('Erreur lors de la modification:', error);
       throw error;
     }
   };
 
-  const handleDeleteCategory = async (id: number) => {
+  const handleDeleteSubcategory = async (id: number) => {
     try {
-      await adminService.deleteCategory(id);
-      await loadCategories();
+      await adminService.deleteSubcategory(id);
+      await loadSubcategories();
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
     }
@@ -81,45 +91,33 @@ export default function CategoriesPage() {
 
   const handleStatusChange = async (id: number, status: 'active' | 'inactive') => {
     try {
-      const category = categories.find(c => c.id === id);
-      if (category) {
-        await adminService.updateCategory(id, { ...category, is_active: status === 'active' });
-        await loadCategories();
+      const subcategory = subcategories.find(s => s.id === id);
+      if (subcategory) {
+        await adminService.updateSubcategory(id, { ...subcategory, is_active: status === 'active' });
+        await loadSubcategories();
       }
     } catch (error) {
       console.error('Erreur lors du changement de statut:', error);
     }
   };
 
-  const handleEdit = (category: AdminCategory) => {
-    setEditingCategory(category);
+  const handleEdit = (subcategory: AdminSubcategory) => {
+    setEditingSubcategory(subcategory);
     setShowForm(true);
   };
 
   const handleCancel = () => {
     setShowForm(false);
-    setEditingCategory(undefined);
+    setEditingSubcategory(undefined);
   };
 
   const handlePageChange = (page: number) => {
     setMeta(prev => ({ ...prev, current_page: page }));
   };
 
-  const handleManageSubcategories = (category: AdminCategory) => {
-    setSelectedCategoryForSubcategories(category);
-    setShowSubcategoriesModal(true);
-  };
-
-  const handleCloseSubcategoriesModal = () => {
-    setShowSubcategoriesModal(false);
-    setSelectedCategoryForSubcategories(null);
-  };
-
-  const filteredCategories = categories.filter(category => {
-    const matchesSearch = category.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || 
-      (statusFilter === 'active' && category.is_active) || 
-      (statusFilter === 'inactive' && !category.is_active);
+  const filteredSubcategories = subcategories.filter(subcategory => {
+    const matchesSearch = subcategory.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' ? subcategory.is_active : !subcategory.is_active);
     return matchesSearch && matchesStatus;
   });
 
@@ -129,16 +127,16 @@ export default function CategoriesPage() {
         {/* En-tête */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gestion des catégories</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Gestion des sous-catégories</h1>
             <p className="mt-1 text-sm text-gray-500">
-              Gérez vos catégories de produits
+              Gérez vos sous-catégories de produits
             </p>
           </div>
           <button
             onClick={() => setShowForm(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           >
-            Nouvelle catégorie
+            Nouvelle sous-catégorie
           </button>
         </div>
 
@@ -146,9 +144,10 @@ export default function CategoriesPage() {
         {showForm && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-              <CategoryForm
-                category={editingCategory}
-                onSubmit={editingCategory ? handleUpdateCategory : handleCreateCategory}
+              <SubcategoryForm
+                subcategory={editingSubcategory}
+                categories={categories}
+                onSubmit={editingSubcategory ? handleUpdateSubcategory : handleCreateSubcategory}
                 onCancel={handleCancel}
               />
             </div>
@@ -161,11 +160,25 @@ export default function CategoriesPage() {
             <div className="flex-1">
               <input
                 type="text"
-                placeholder="Rechercher une catégorie..."
+                placeholder="Rechercher une sous-catégorie..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+            </div>
+            <div>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Toutes les catégories</option>
+                {categories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <select
@@ -182,12 +195,11 @@ export default function CategoriesPage() {
         </div>
 
         {/* Tableau */}
-        <CategoryTable
-          categories={filteredCategories}
+        <SubcategoryTable
+          subcategories={filteredSubcategories}
           onEdit={handleEdit}
-          onDelete={handleDeleteCategory}
+          onDelete={handleDeleteSubcategory}
           onStatusChange={handleStatusChange}
-          onManageSubcategories={handleManageSubcategories}
           isLoading={loading}
         />
 
@@ -199,15 +211,6 @@ export default function CategoriesPage() {
           />
         )}
       </div>
-
-      {/* Modal des sous-catégories */}
-      {selectedCategoryForSubcategories && (
-        <SubcategoriesModal
-          category={selectedCategoryForSubcategories}
-          isOpen={showSubcategoriesModal}
-          onClose={handleCloseSubcategoriesModal}
-        />
-      )}
     </AdminLayout>
   );
 }

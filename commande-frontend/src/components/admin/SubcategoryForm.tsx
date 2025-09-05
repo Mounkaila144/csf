@@ -8,24 +8,23 @@ interface SubcategoryFormProps {
   categories: AdminCategory[];
   onSubmit: (data: SubcategoryFormData) => Promise<void>;
   onCancel: () => void;
-  isLoading?: boolean;
 }
 
-export default function SubcategoryForm({ 
-  subcategory, 
+export default function SubcategoryForm({
+  subcategory,
   categories,
-  onSubmit, 
-  onCancel, 
-  isLoading = false 
+  onSubmit,
+  onCancel
 }: SubcategoryFormProps) {
   const [formData, setFormData] = useState<SubcategoryFormData>({
     name: '',
     description: '',
     category_id: 0,
-    status: 'active'
+    is_active: true,
+    image: ''
   });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (subcategory) {
@@ -33,94 +32,65 @@ export default function SubcategoryForm({
         name: subcategory.name,
         description: subcategory.description || '',
         category_id: subcategory.category_id,
-        status: subcategory.status
+        is_active: subcategory.is_active,
+        image: subcategory.image || ''
       });
     }
   }, [subcategory]);
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Le nom est requis';
-    } else if (formData.name.length < 2) {
-      newErrors.name = 'Le nom doit contenir au moins 2 caractères';
-    }
-
-    if (!formData.category_id || formData.category_id === 0) {
-      newErrors.category_id = 'Veuillez sélectionner une catégorie';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+    setErrors({});
+    setIsSubmitting(true);
 
     try {
       await onSubmit(formData);
-    } catch (error) {
-      console.error('Erreur lors de la soumission:', error);
+    } catch (error: any) {
+      if (error.response?.data?.errors) {
+        setErrors(error.response.data.errors);
+      } else {
+        setErrors({ general: ['Une erreur est survenue lors de la sauvegarde.'] });
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    const processedValue = name === 'category_id' ? parseInt(value) : value;
-    
+    const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: processedValue
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked 
+              : name === 'category_id' ? parseInt(value) || 0
+              : value
     }));
-    
-    // Effacer l'erreur du champ modifié
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        {subcategory ? 'Modifier la sous-catégorie' : 'Nouvelle sous-catégorie'}
-      </h2>
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">
+          {subcategory ? 'Modifier la sous-catégorie' : 'Nouvelle sous-catégorie'}
+        </h2>
+        <button
+          onClick={onCancel}
+          className="text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {errors.general && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+          <div className="text-sm text-red-600">
+            {errors.general.join(', ')}
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Catégorie parente */}
-        <div>
-          <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 mb-2">
-            Catégorie parente *
-          </label>
-          <select
-            id="category_id"
-            name="category_id"
-            value={formData.category_id}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.category_id ? 'border-red-500' : 'border-gray-300'
-            }`}
-            disabled={isLoading}
-          >
-            <option value={0}>Sélectionnez une catégorie</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-          {errors.category_id && (
-            <p className="mt-1 text-sm text-red-600">{errors.category_id}</p>
-          )}
-        </div>
-
         {/* Nom */}
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -132,14 +102,43 @@ export default function SubcategoryForm({
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.name ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.name ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="Entrez le nom de la sous-catégorie"
-            disabled={isLoading}
           />
           {errors.name && (
-            <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+            <p className="mt-1 text-sm text-red-600">
+              {errors.name.join(', ')}
+            </p>
+          )}
+        </div>
+
+        {/* Catégorie parente */}
+        <div>
+          <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 mb-2">
+            Catégorie parente *
+          </label>
+          <select
+            id="category_id"
+            name="category_id"
+            value={formData.category_id}
+            onChange={handleChange}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.category_id ? 'border-red-300' : 'border-gray-300'
+            }`}
+          >
+            <option value={0}>Sélectionnez une catégorie</option>
+            {categories.map(category => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+          {errors.category_id && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.category_id.join(', ')}
+            </p>
           )}
         </div>
 
@@ -153,54 +152,83 @@ export default function SubcategoryForm({
             name="description"
             value={formData.description}
             onChange={handleChange}
-            rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows={3}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.description ? 'border-red-300' : 'border-gray-300'
+            }`}
             placeholder="Description de la sous-catégorie (optionnel)"
-            disabled={isLoading}
           />
+          {errors.description && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.description.join(', ')}
+            </p>
+          )}
+        </div>
+
+        {/* Image */}
+        <div>
+          <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
+            URL de l'image
+          </label>
+          <input
+            type="url"
+            id="image"
+            name="image"
+            value={formData.image}
+            onChange={handleChange}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.image ? 'border-red-300' : 'border-gray-300'
+            }`}
+            placeholder="https://exemple.com/image.jpg"
+          />
+          {errors.image && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.image.join(', ')}
+            </p>
+          )}
         </div>
 
         {/* Statut */}
         <div>
-          <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-            Statut
-          </label>
-          <select
-            id="status"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isLoading}
-          >
-            <option value="active">Actif</option>
-            <option value="inactive">Inactif</option>
-          </select>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="is_active"
+              name="is_active"
+              checked={formData.is_active}
+              onChange={handleChange}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="is_active" className="ml-2 block text-sm text-gray-700">
+              Sous-catégorie active
+            </label>
+          </div>
+          <p className="mt-1 text-sm text-gray-500">
+            Les sous-catégories inactives ne seront pas affichées sur le site
+          </p>
+          {errors.is_active && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.is_active.join(', ')}
+            </p>
+          )}
         </div>
 
         {/* Boutons */}
-        <div className="flex justify-end space-x-4 pt-6">
+        <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-            disabled={isLoading}
+            disabled={isSubmitting}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           >
             Annuler
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading}
+            disabled={isSubmitting || formData.category_id === 0}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? (
-              <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Enregistrement...
-              </div>
-            ) : (
-              subcategory ? 'Modifier' : 'Créer'
-            )}
+            {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
           </button>
         </div>
       </form>

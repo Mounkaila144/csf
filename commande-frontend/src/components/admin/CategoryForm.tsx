@@ -19,7 +19,8 @@ export default function CategoryForm({
   const [formData, setFormData] = useState<CategoryFormData>({
     name: '',
     description: '',
-    status: 'active'
+    is_active: true,
+    image: ''
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -29,7 +30,8 @@ export default function CategoryForm({
       setFormData({
         name: category.name,
         description: category.description || '',
-        status: category.status
+        is_active: category.is_active,
+        image: category.image || ''
       });
     }
   }, [category]);
@@ -62,10 +64,10 @@ export default function CategoryForm({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }));
     
     // Effacer l'erreur du champ modifié
@@ -123,22 +125,42 @@ export default function CategoryForm({
           />
         </div>
 
-        {/* Statut */}
+        {/* Image */}
         <div>
-          <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-            Statut
+          <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
+            URL de l'image
           </label>
-          <select
-            id="status"
-            name="status"
-            value={formData.status}
+          <input
+            type="url"
+            id="image"
+            name="image"
+            value={formData.image || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="https://exemple.com/image.jpg"
             disabled={isLoading}
-          >
-            <option value="active">Actif</option>
-            <option value="inactive">Inactif</option>
-          </select>
+          />
+        </div>
+
+        {/* Statut */}
+        <div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="is_active"
+              name="is_active"
+              checked={formData.is_active}
+              onChange={handleChange}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              disabled={isLoading}
+            />
+            <label htmlFor="is_active" className="ml-2 block text-sm text-gray-700">
+              Catégorie active
+            </label>
+          </div>
+          <p className="mt-1 text-sm text-gray-500">
+            Les catégories inactives ne seront pas affichées sur le site
+          </p>
         </div>
 
         {/* Boutons */}

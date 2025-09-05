@@ -10,15 +10,27 @@ use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $perPage = $request->get('per_page', 10);
+        $page = $request->get('page', 1);
+        
         $categories = Category::with('subcategories')
             ->where('is_active', true)
-            ->get();
+            ->paginate($perPage);
 
         return response()->json([
             'status' => 'success',
-            'data' => $categories
+            'message' => 'Categories retrieved successfully',
+            'data' => $categories->items(),
+            'meta' => [
+                'current_page' => $categories->currentPage(),
+                'last_page' => $categories->lastPage(),
+                'per_page' => $categories->perPage(),
+                'total' => $categories->total(),
+                'from' => $categories->firstItem(),
+                'to' => $categories->lastItem()
+            ]
         ]);
     }
 

@@ -43,7 +43,8 @@ export interface AdminCategory {
   id: number;
   name: string;
   description?: string;
-  status: 'active' | 'inactive';
+  is_active: boolean;
+  image?: string;
   created_at: string;
   updated_at: string;
   products_count?: number;
@@ -54,7 +55,8 @@ export interface AdminSubcategory {
   name: string;
   description?: string;
   category_id: number;
-  status: 'active' | 'inactive';
+  is_active: boolean;
+  image?: string;
   created_at: string;
   updated_at: string;
   category?: AdminCategory;
@@ -65,14 +67,16 @@ export interface AdminSubcategory {
 export interface CategoryFormData {
   name: string;
   description?: string;
-  status: 'active' | 'inactive';
+  is_active: boolean;
+  image?: string;
 }
 
 export interface SubcategoryFormData {
   name: string;
   description?: string;
   category_id: number;
-  status: 'active' | 'inactive';
+  is_active: boolean;
+  image?: string;
 }
 
 export interface ProductFormData {

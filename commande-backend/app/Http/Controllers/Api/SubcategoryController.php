@@ -11,15 +11,32 @@ use Illuminate\Support\Facades\Validator;
 
 class SubcategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $subcategories = Subcategory::with(['category', 'products'])
-            ->where('is_active', true)
-            ->get();
+        $perPage = $request->get('per_page', 10);
+        $categoryId = $request->get('category_id');
+        
+        $query = Subcategory::with(['category', 'products'])
+            ->where('is_active', true);
+            
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+        
+        $subcategories = $query->paginate($perPage);
 
         return response()->json([
             'status' => 'success',
-            'data' => $subcategories
+            'message' => 'Subcategories retrieved successfully',
+            'data' => $subcategories->items(),
+            'meta' => [
+                'current_page' => $subcategories->currentPage(),
+                'last_page' => $subcategories->lastPage(),
+                'per_page' => $subcategories->perPage(),
+                'total' => $subcategories->total(),
+                'from' => $subcategories->firstItem(),
+                'to' => $subcategories->lastItem()
+            ]
         ]);
     }
 

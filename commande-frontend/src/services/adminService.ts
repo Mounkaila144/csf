@@ -102,7 +102,7 @@ class AdminService {
   
   async getCategories(page = 1, perPage = 10): Promise<PaginatedResponse<Category>> {
     const response = await fetch(
-      `${API_BASE_URL}/categories?page=${page}&per_page=${perPage}`,
+      `${API_BASE_URL}/admin/categories?page=${page}&per_page=${perPage}`,
       {
         method: 'GET',
         headers: this.getHeaders(),
@@ -113,7 +113,7 @@ class AdminService {
   }
 
   async getCategory(id: number): Promise<ApiResponse<Category>> {
-    const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
       method: 'GET',
       headers: this.getHeaders(),
     });
@@ -122,7 +122,7 @@ class AdminService {
   }
 
   async createCategory(data: CategoryData): Promise<ApiResponse<Category>> {
-    const response = await fetch(`${API_BASE_URL}/categories`, {
+    const response = await fetch(`${API_BASE_URL}/admin/categories`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
@@ -132,7 +132,7 @@ class AdminService {
   }
 
   async updateCategory(id: number, data: CategoryData): Promise<ApiResponse<Category>> {
-    const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
       method: 'PUT',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
@@ -142,7 +142,7 @@ class AdminService {
   }
 
   async deleteCategory(id: number): Promise<ApiResponse<null>> {
-    const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
       method: 'DELETE',
       headers: this.getHeaders(),
     });
@@ -153,7 +153,7 @@ class AdminService {
   // ==================== SUBCATEGORIES ====================
   
   async getSubcategories(page = 1, perPage = 10, categoryId?: number): Promise<PaginatedResponse<Subcategory>> {
-    let url = `${API_BASE_URL}/subcategories?page=${page}&per_page=${perPage}`;
+    let url = `${API_BASE_URL}/admin/subcategories?page=${page}&per_page=${perPage}`;
     if (categoryId) {
       url += `&category_id=${categoryId}`;
     }
@@ -167,7 +167,7 @@ class AdminService {
   }
 
   async getSubcategory(id: number): Promise<ApiResponse<Subcategory>> {
-    const response = await fetch(`${API_BASE_URL}/subcategories/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/admin/subcategories/${id}`, {
       method: 'GET',
       headers: this.getHeaders(),
     });
@@ -176,7 +176,7 @@ class AdminService {
   }
 
   async createSubcategory(data: SubcategoryData): Promise<ApiResponse<Subcategory>> {
-    const response = await fetch(`${API_BASE_URL}/subcategories`, {
+    const response = await fetch(`${API_BASE_URL}/admin/subcategories`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
@@ -186,7 +186,7 @@ class AdminService {
   }
 
   async updateSubcategory(id: number, data: SubcategoryData): Promise<ApiResponse<Subcategory>> {
-    const response = await fetch(`${API_BASE_URL}/subcategories/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/admin/subcategories/${id}`, {
       method: 'PUT',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
@@ -196,7 +196,7 @@ class AdminService {
   }
 
   async deleteSubcategory(id: number): Promise<ApiResponse<null>> {
-    const response = await fetch(`${API_BASE_URL}/subcategories/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/admin/subcategories/${id}`, {
       method: 'DELETE',
       headers: this.getHeaders(),
     });
@@ -240,7 +240,7 @@ class AdminService {
   }
 
   async createProduct(data: ProductData): Promise<ApiResponse<Product>> {
-    const response = await fetch(`${API_BASE_URL}/products`, {
+    const response = await fetch(`${API_BASE_URL}/admin/products`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
@@ -250,7 +250,7 @@ class AdminService {
   }
 
   async updateProduct(id: number, data: ProductData): Promise<ApiResponse<Product>> {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
       method: 'PUT',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
@@ -260,7 +260,7 @@ class AdminService {
   }
 
   async deleteProduct(id: number): Promise<ApiResponse<null>> {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
       method: 'DELETE',
       headers: this.getHeaders(),
     });

@@ -23,29 +23,28 @@ Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     
-    Route::middleware('auth:api')->group(function () {
-        Route::get('me', [AuthController::class, 'me']);
-        Route::post('logout', [AuthController::class, 'logout']);
-        Route::post('refresh', [AuthController::class, 'refresh']);
-    });
+    // Protected auth routes - use JWT middleware directly
+    Route::get('me', [AuthController::class, 'me']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
 });
 
 // Protected routes examples
-Route::middleware(['auth:api', 'role:admin'])->group(function () {
+Route::middleware(['role:admin'])->group(function () {
     // Routes accessible only by admins
     Route::get('/admin/dashboard', function () {
         return response()->json(['message' => 'Admin dashboard access granted']);
     });
 });
 
-Route::middleware(['auth:api', 'role:client'])->group(function () {
+Route::middleware(['role:client'])->group(function () {
     // Routes accessible only by clients
     Route::get('/client/profile', function () {
         return response()->json(['message' => 'Client profile access granted']);
     });
 });
 
-Route::middleware(['auth:api', 'role:admin,client'])->group(function () {
+Route::middleware(['role:admin,client'])->group(function () {
     // Routes accessible by both admins and clients
     Route::get('/shared/data', function () {
         return response()->json(['message' => 'Shared data access granted']);
@@ -53,6 +52,7 @@ Route::middleware(['auth:api', 'role:admin,client'])->group(function () {
 });
 
 // Public routes (no authentication required)
+Route::get('categories', [CategoryController::class, 'index']);
 Route::get('categories/active', [CategoryController::class, 'getActiveCategories']);
 Route::get('subcategories/active', [SubcategoryController::class, 'getActiveSubcategories']);
 Route::get('subcategories/category/{categoryId}', [SubcategoryController::class, 'getByCategory']);
@@ -60,8 +60,8 @@ Route::get('products', [ProductController::class, 'index']);
 Route::get('products/{product}', [ProductController::class, 'show']);
 Route::get('products/featured/list', [ProductController::class, 'getFeaturedProducts']);
 
-// Admin only routes
-Route::middleware(['auth:api', 'role:admin'])->group(function () {
+// Admin only routes - use only role middleware which handles JWT auth internally
+Route::middleware(['role:admin'])->prefix('admin')->group(function () {
     // Categories management
     Route::apiResource('categories', CategoryController::class);
     
