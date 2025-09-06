@@ -7,9 +7,10 @@ interface HeaderProps {
   onSearch: (query: string) => void;
   onShowLogin: () => void;
   onShowRegister: () => void;
+  onOpenCart: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, onShowRegister }) => {
+const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, onShowRegister, onOpenCart }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currency, setCurrency] = useState('CFA');
   const [language, setLanguage] = useState('FR');
@@ -325,11 +326,13 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
                 )}
               </div>
 
-              <button className={`relative p-3 rounded-xl transition-all duration-300 group hover:scale-110 ${
-                isScrolled
-                  ? 'hover:bg-blue-50 hover:shadow-lg'
-                  : 'hover:bg-white/10'
-              }`}>
+              <button 
+                onClick={onOpenCart}
+                className={`relative p-3 rounded-xl transition-all duration-300 group hover:scale-110 ${
+                  isScrolled
+                    ? 'hover:bg-blue-50 hover:shadow-lg'
+                    : 'hover:bg-white/10'
+                }`}>
                 <ShoppingCart size={22} className={`transition-colors duration-300 ${
                   isScrolled
                     ? 'text-gray-600 group-hover:text-blue-600'
@@ -443,11 +446,13 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
               }`}>
               <User size={24} />
             </button>
-            <button className={`relative p-3 rounded-xl transition-all duration-300 ${
-              isScrolled
-                ? 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                : 'text-white hover:bg-white/10 hover:text-blue-300'
-            }`}>
+            <button 
+              onClick={onOpenCart}
+              className={`relative p-3 rounded-xl transition-all duration-300 ${
+                isScrolled
+                  ? 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+                  : 'text-white hover:bg-white/10 hover:text-blue-300'
+              }`}>
               <ShoppingCart size={24} />
               {cartItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">

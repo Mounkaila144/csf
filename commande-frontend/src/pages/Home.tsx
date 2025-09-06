@@ -8,7 +8,6 @@ import Footer from '../components/Footer';
 import WhatsAppButton from '../components/WhatsAppButton';
 import { banners } from '../data/mockData'; // On garde les banners mockées pour l'instant
 import { FilterOptions, Product, Category } from '../types';
-import { useCart } from '../hooks/useCart';
 import { useFavorites } from '../hooks/useFavorites';
 import { publicService, PublicProduct, PublicCategory } from '../services/publicService';
 
@@ -34,7 +33,6 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { addToCart } = useCart();
   const { favorites, toggleFavorite } = useFavorites();
 
   // Charger les données depuis l'API
@@ -191,7 +189,6 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
               filters={filters}
               favorites={favorites}
               onToggleFavorite={toggleFavorite}
-              onAddToCart={addToCart}
             />
           </main>
         </div>
@@ -199,7 +196,6 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
       
       {/* Status Sections */}
       <StatusSections
-        onAddToCart={addToCart}
         onToggleFavorite={toggleFavorite}
         favorites={favorites}
       />

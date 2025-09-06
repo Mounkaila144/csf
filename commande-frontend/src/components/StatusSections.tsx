@@ -3,18 +3,18 @@ import { Heart, ShoppingCart, ArrowRight } from 'lucide-react';
 import { Product, ProductStatus } from '../types';
 import { PRODUCT_STATUSES, getStatusInfo } from '../constants/productStatus';
 import { publicService, PublicProduct } from '../services/publicService';
+import { useCart } from '../contexts/CartContext';
 
 interface StatusSectionsProps {
-  onAddToCart: (product: Product) => void;
   onToggleFavorite: (productId: string) => void;
   favorites: string[];
 }
 
 const StatusSections: React.FC<StatusSectionsProps> = ({
-  onAddToCart,
   onToggleFavorite,
   favorites
 }) => {
+  const { addItem } = useCart();
   const [productsData, setProductsData] = useState<{
     [key in ProductStatus]: Product[];
   }>({
@@ -147,7 +147,12 @@ const StatusSections: React.FC<StatusSectionsProps> = ({
         </div>
         
         <button
-          onClick={() => onAddToCart(product)}
+          onClick={() => addItem({
+            id: parseInt(product.id),
+            name: product.name,
+            price: product.price,
+            image: product.image,
+          })}
           className="w-full bg-blue-600 text-white py-2 px-3 sm:px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center space-x-1 sm:space-x-2 text-sm sm:text-base"
         >
           <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4" />

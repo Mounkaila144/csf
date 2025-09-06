@@ -4,14 +4,12 @@ import ProductCard from './ProductCard';
 
 interface FeaturedSectionsProps {
   products?: Product[];
-  onAddToCart: (product: Product) => void;
   onToggleFavorite: (productId: string) => void;
   favorites?: string[];
 }
 
 const FeaturedSections: React.FC<FeaturedSectionsProps> = ({
   products = [],
-  onAddToCart,
   onToggleFavorite,
   favorites = []
 }) => {
@@ -46,7 +44,6 @@ const FeaturedSections: React.FC<FeaturedSectionsProps> = ({
             <ProductCard
               key={product.id}
               product={product}
-              onAddToCart={onAddToCart}
               onToggleFavorite={onToggleFavorite}
               isFavorite={favorites.includes(product.id)}
             />

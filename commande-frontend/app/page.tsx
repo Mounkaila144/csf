@@ -5,16 +5,18 @@ import { AuthProvider } from '../src/contexts/AuthProvider';
 import Header from '../src/components/Header';
 import AdminAutoRedirect from '../src/components/AdminAutoRedirect';
 import { Home } from '../src/pages/Home';
-import { useCart } from '../src/hooks/useCart';
+import { useCart } from '../src/contexts/CartContext';
 import { LoginModal } from '../src/components/LoginModal';
 import { RegisterModal } from '../src/components/RegisterModal';
+import CartSidebar from '../src/components/CartSidebar';
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const { getTotalItems } = useCart();
+  const { totalItems } = useCart();
 
 
 
@@ -31,16 +33,21 @@ export default function HomePage() {
     setShowRegisterModal(true);
   };
 
+  const handleOpenCart = () => {
+    setIsCartOpen(true);
+  };
+
   return (
     <AuthProvider>
       {/* Si l'utilisateur est admin et connecté, le rediriger vers /admin */}
       <AdminAutoRedirect />
       <div className="min-h-screen bg-gray-50">
         <Header
-          cartItemCount={getTotalItems()}
+          cartItemCount={totalItems}
           onSearch={handleSearch}
           onShowLogin={handleShowLogin}
           onShowRegister={handleShowRegister}
+          onOpenCart={handleOpenCart}
         />
 
 
@@ -63,6 +70,11 @@ export default function HomePage() {
             setShowRegisterModal(false);
             setShowLoginModal(true);
           }}
+        />
+
+        <CartSidebar
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
         />
       </div>
     </AuthProvider>

@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
+import OrderModal from './OrderModal';
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface CartSidebarProps {
 
 const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
   const { items, totalAmount, updateQuantity, removeItem } = useCart();
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   if (!isOpen) return null;
 
@@ -101,7 +103,10 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
               </div>
               
               <div className="space-y-2">
-                <button className="w-full bg-custom-blue text-white py-3 rounded-lg font-medium hover:bg-custom-blue-hover transition-colors">
+                <button 
+                  onClick={() => setIsOrderModalOpen(true)}
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                >
                   Passer la commande
                 </button>
                 <button 
@@ -115,6 +120,12 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
           )}
         </div>
       </div>
+
+      {/* Order Modal */}
+      <OrderModal
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+      />
     </>
   );
 };
