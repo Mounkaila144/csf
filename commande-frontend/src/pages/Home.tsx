@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CategoryMenu from '../components/CategoryMenu';
 import Banner from '../components/Banner';
 import Sidebar from '../components/Sidebar';
@@ -6,10 +6,11 @@ import ProductGrid from '../components/ProductGrid';
 import FeaturedSections from '../components/FeaturedSections';
 import Footer from '../components/Footer';
 import WhatsAppButton from '../components/WhatsAppButton';
-import { products, categories, banners } from '../data/mockData';
-import { FilterOptions } from '../types';
+import { banners } from '../data/mockData'; // On garde les banners mockées pour l'instant
+import { FilterOptions, Product, Category } from '../types';
 import { useCart } from '../hooks/useCart';
 import { useFavorites } from '../hooks/useFavorites';
+import { publicService, PublicProduct, PublicCategory } from '../services/publicService';
 
 interface HomeProps {
   searchQuery?: string;
@@ -26,8 +27,55 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
     sort: 'bestseller'
   });
 
+  // États pour les données API
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const { addToCart } = useCart();
   const { favorites, toggleFavorite } = useFavorites();
+
+  // Charger les données depuis l'API
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Charger les produits et catégories en parallèle
+      const [productsResponse, categoriesResponse] = await Promise.all([
+        publicService.getProducts(1, 50), // Charger plus de produits pour la page d'accueil
+        publicService.getActiveCategories()
+      ]);
+
+      // Convertir les produits vers le format attendu par les composants
+      const convertedProducts = productsResponse.data.map(product => 
+        publicService.convertToFrontendProduct(product)
+      );
+
+      // Convertir les catégories vers le format attendu par les composants
+      const convertedCategories = categoriesResponse.data.map(category =>
+        publicService.convertToFrontendCategory(category)
+      );
+
+      setProducts(convertedProducts);
+      setCategories(convertedCategories);
+      
+      // Définir les produits vedettes (pour l'instant, on prend les premiers)
+      setFeaturedProducts(convertedProducts.slice(0, 8));
+
+    } catch (error) {
+      console.error('Erreur lors du chargement des données:', error);
+      setError('Erreur lors du chargement des données');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -48,6 +96,35 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
     }
     return true;
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-lg text-gray-600">Chargement des produits...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Erreur de chargement</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={loadData}
+            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -87,7 +164,7 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
       
       {/* Featured Sections */}
       <FeaturedSections
-        products={products}
+        products={featuredProducts}
         onAddToCart={addToCart}
         onToggleFavorite={toggleFavorite}
         favorites={favorites}
