@@ -16,8 +16,13 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const { user, isAuthenticated, logout } = useAuth();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
 
 
@@ -229,7 +234,13 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
                       : 'hover:bg-white/10'
                   }`}
                 >
-                  {isAuthenticated ? (
+                  {!mounted ? (
+                    <User size={22} className={`transition-colors duration-300 ${
+                      isScrolled
+                        ? 'text-gray-600 group-hover:text-blue-600'
+                        : 'text-white group-hover:text-blue-300'
+                    }`} />
+                  ) : isAuthenticated ? (
                     <UserCheck size={22} className={`transition-colors duration-300 ${
                       isScrolled
                         ? 'text-green-600 group-hover:text-green-700'
@@ -245,12 +256,12 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
                 </button>
 
                 {/* User Dropdown Menu */}
-                {showUserMenu && (
+                {mounted && showUserMenu && (
                   <div className={`absolute right-0 mt-2 w-56 rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 z-50 ${
                     isScrolled ? 'bg-white' : 'bg-white'
                   }`}>
                     <div className="py-2">
-                      {isAuthenticated ? (
+                      {mounted && isAuthenticated ? (
                         <>
                           <div className="px-4 py-3 border-b border-gray-100">
                             <p className="text-sm font-medium text-gray-900">Bonjour,</p>

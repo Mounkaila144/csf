@@ -1,0 +1,39 @@
+// Version nettoyée pour remplacement après test
+const handleCategorySelect = (categoryId: string) => {
+  setSelectedCategory(categoryId);
+  
+  // Si c'est une sous-catégorie (format: "categoryId-subcategoryId")
+  if (categoryId.includes('-')) {
+    const [catId, subId] = categoryId.split('-');
+    setFilters(prev => ({ 
+      ...prev, 
+      categories: [catId],
+      subcategoryId: parseInt(subId)
+    }));
+  } else {
+    // Si c'est une catégorie principale
+    setFilters(prev => ({ 
+      ...prev, 
+      categories: [categoryId],
+      subcategoryId: undefined
+    }));
+  }
+};
+
+// Filter products based on search and category
+const filteredProducts = products.filter(product => {
+  if (searchQuery) {
+    return product.name.toLowerCase().includes(searchQuery.toLowerCase());
+  }
+  if (selectedCategory) {
+    if (selectedCategory.includes('-')) {
+      // Filtrage par sous-catégorie
+      const [catId, subId] = selectedCategory.split('-');
+      return product.categoryId === catId && product.subcategoryId === subId;
+    } else {
+      // Filtrage par catégorie
+      return product.categoryId === selectedCategory;
+    }
+  }
+  return true;
+});

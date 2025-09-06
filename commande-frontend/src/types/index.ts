@@ -8,6 +8,9 @@ export interface Product {
   rating: number;
   reviews: number;
   category: string;
+  categoryId?: string;
+  subcategoryId?: string;
+  subcategory?: string;
   isNew?: boolean;
   isPromo?: boolean;
   isBestSeller?: boolean;
@@ -17,7 +20,10 @@ export interface Product {
 export interface Category {
   id: string;
   name: string;
-  subcategories?: string[];
+  subcategories?: {
+    id: string;
+    name: string;
+  }[];
 }
 
 // Types étendus pour l'administration
@@ -121,6 +127,7 @@ export interface CartItem {
 export interface FilterOptions {
   priceRange: [number, number];
   categories: string[];
+  subcategoryId?: number;
   rating: number;
   freeShipping: boolean;
   sort: 'price-asc' | 'price-desc' | 'rating' | 'newest' | 'bestseller';

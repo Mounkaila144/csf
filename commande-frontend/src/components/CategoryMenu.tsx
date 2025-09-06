@@ -5,9 +5,10 @@ import { Category } from '../types';
 interface CategoryMenuProps {
   categories: Category[];
   onCategorySelect: (categoryId: string) => void;
+  selectedCategory?: string | null;
 }
 
-const CategoryMenu: React.FC<CategoryMenuProps> = ({ categories, onCategorySelect }) => {
+const CategoryMenu: React.FC<CategoryMenuProps> = ({ categories, onCategorySelect, selectedCategory }) => {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -46,13 +47,13 @@ const CategoryMenu: React.FC<CategoryMenuProps> = ({ categories, onCategorySelec
               {category.subcategories && hoveredCategory === category.id && (
                 <div className="absolute top-full left-0 bg-white text-gray-800 shadow-xl rounded-lg min-w-48 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <div className="py-2">
-                    {category.subcategories.map((subcategory, index) => (
+                    {category.subcategories.map((subcategory) => (
                       <button
-                        key={index}
-                        onClick={() => onCategorySelect(category.id)}
+                        key={subcategory.id}
+                        onClick={() => onCategorySelect(`${category.id}-${subcategory.id}`)}
                         className="block w-full text-left px-4 py-2 hover:bg-blue-50 hover:text-blue-800 transition-colors"
                       >
-                        {subcategory}
+                        {subcategory.name}
                       </button>
                     ))}
                   </div>
@@ -76,13 +77,13 @@ const CategoryMenu: React.FC<CategoryMenuProps> = ({ categories, onCategorySelec
                   </button>
                   {category.subcategories && (
                     <div className="ml-4 space-y-1">
-                      {category.subcategories.map((subcategory, index) => (
+                      {category.subcategories.map((subcategory) => (
                         <button
-                          key={index}
-                          onClick={() => onCategorySelect(category.id)}
+                          key={subcategory.id}
+                          onClick={() => onCategorySelect(`${category.id}-${subcategory.id}`)}
                           className="block w-full text-left px-4 py-1 text-sm text-blue-200 hover:text-white transition-colors"
                         >
-                          {subcategory}
+                          {subcategory.name}
                         </button>
                       ))}
                     </div>

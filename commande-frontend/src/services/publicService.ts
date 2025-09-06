@@ -187,6 +187,9 @@ class PublicService {
       rating: 4.5, // Valeur par défaut, à implémenter dans l'API
       reviews: 0, // Valeur par défaut, à implémenter dans l'API
       category: apiProduct.category?.name || 'Non catégorisé',
+      categoryId: apiProduct.category_id.toString(),
+      subcategoryId: apiProduct.subcategory_id?.toString(),
+      subcategory: apiProduct.subcategory?.name,
       isNew: false, // À calculer basé sur la date de création
       isPromo: false, // À implémenter dans l'API
       isBestSeller: false, // À calculer basé sur les ventes
@@ -199,7 +202,10 @@ class PublicService {
     return {
       id: apiCategory.id.toString(),
       name: apiCategory.name,
-      subcategories: apiCategory.subcategories?.map(sub => sub.name) || []
+      subcategories: apiCategory.subcategories?.map(sub => ({
+        id: sub.id.toString(),
+        name: sub.name
+      })) || []
     };
   }
 }

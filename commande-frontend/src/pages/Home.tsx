@@ -78,8 +78,30 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
   };
 
   const handleCategorySelect = (categoryId: string) => {
+    console.log('Category selected:', categoryId);
+    console.log('Available categories:', categories);
+    console.log('Available products:', products);
+    
     setSelectedCategory(categoryId);
-    setFilters(prev => ({ ...prev, categories: [categoryId] }));
+    
+    // Si c'est une sous-catégorie (format: "categoryId-subcategoryId")
+    if (categoryId.includes('-')) {
+      const [catId, subId] = categoryId.split('-');
+      console.log('Subcategory filter - catId:', catId, 'subId:', subId);
+      setFilters(prev => ({ 
+        ...prev, 
+        categories: [catId],
+        subcategoryId: parseInt(subId)
+      }));
+    } else {
+      // Si c'est une catégorie principale
+      console.log('Category filter - catId:', categoryId);
+      setFilters(prev => ({ 
+        ...prev, 
+        categories: [categoryId],
+        subcategoryId: undefined
+      }));
+    }
   };
 
   const handleFilterChange = (newFilters: FilterOptions) => {
@@ -88,14 +110,27 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
 
   // Filter products based on search and category
   const filteredProducts = products.filter(product => {
+    console.log('Filtering product:', product.name, 'categoryId:', product.categoryId, 'subcategoryId:', product.subcategoryId);
+    
     if (searchQuery) {
       return product.name.toLowerCase().includes(searchQuery.toLowerCase());
     }
     if (selectedCategory) {
-      return product.category === selectedCategory;
+      if (selectedCategory.includes('-')) {
+        // Filtrage par sous-catégorie
+        const [catId, subId] = selectedCategory.split('-');
+        console.log('Subcategory filter - looking for catId:', catId, 'subId:', subId);
+        return product.categoryId === catId && product.subcategoryId === subId;
+      } else {
+        // Filtrage par catégorie
+        console.log('Category filter - looking for catId:', selectedCategory);
+        return product.categoryId === selectedCategory;
+      }
     }
     return true;
   });
+
+  console.log('Filtered products count:', filteredProducts.length);
 
   if (loading) {
     return (
