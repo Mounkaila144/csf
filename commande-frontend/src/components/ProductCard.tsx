@@ -1,20 +1,29 @@
 import React from 'react';
 import { Star, Heart, ShoppingCart, Truck } from 'lucide-react';
 import { Product } from '../types';
+import { useCart } from '../contexts/CartContext';
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: (product: Product) => void;
   onToggleFavorite: (productId: string) => void;
   isFavorite?: boolean;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ 
   product, 
-  onAddToCart, 
   onToggleFavorite, 
   isFavorite = false 
 }) => {
+  const { addItem } = useCart();
+
+  const handleAddToCart = () => {
+    addItem({
+      id: parseInt(product.id),
+      name: product.name,
+      price: product.price,
+      image: product.image,
+    });
+  };
   const discountPercentage = product.originalPrice 
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
@@ -110,7 +119,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Add to cart button */}
         <button
-          onClick={() => onAddToCart(product)}
+          onClick={handleAddToCart}
           className="w-full bg-custom-blue hover:bg-custom-blue-hover text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 group-hover:bg-custom-blue-hover"
         >
           <ShoppingCart size={18} />

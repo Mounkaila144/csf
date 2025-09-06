@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SubcategoryController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +51,9 @@ Route::middleware(['role:admin,client'])->group(function () {
     Route::get('/shared/data', function () {
         return response()->json(['message' => 'Shared data access granted']);
     });
+    
+    // Orders management
+    Route::apiResource('orders', OrderController::class);
 });
 
 // Public routes (no authentication required)

@@ -5,7 +5,6 @@ import ProductCard from './ProductCard';
 interface ProductGridProps {
   products?: Product[];
   filters?: FilterOptions;
-  onAddToCart: (product: Product) => void;
   onToggleFavorite: (productId: string) => void;
   favorites?: string[];
 }
@@ -13,7 +12,6 @@ interface ProductGridProps {
 const ProductGrid: React.FC<ProductGridProps> = ({
   products = [],
   filters,
-  onAddToCart,
   onToggleFavorite,
   favorites = []
 }) => {
@@ -120,7 +118,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           <ProductCard
             key={product.id}
             product={product}
-            onAddToCart={onAddToCart}
             onToggleFavorite={onToggleFavorite}
             isFavorite={favorites.includes(product.id)}
           />
