@@ -96,14 +96,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   console.log('ProductGrid final filtered products:', filteredProducts.length);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Results header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-800">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
           {filteredProducts.length} produits trouvés
         </h2>
         
-        <div className="text-sm text-gray-600">
+        <div className="text-xs sm:text-sm text-gray-600">
           Trié par: {
             filters.sort === 'price-asc' ? 'Prix croissant' :
             filters.sort === 'price-desc' ? 'Prix décroissant' :
@@ -115,7 +115,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       </div>
 
       {/* Products grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         {filteredProducts.map((product) => (
           <ProductCard
             key={product.id}

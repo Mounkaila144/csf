@@ -1,5 +1,5 @@
-import React from 'react';
-import { Star, Truck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Star, Truck, Filter, X } from 'lucide-react';
 import { FilterOptions } from '../types';
 
 interface SidebarProps {
@@ -8,12 +8,14 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ filters, onFilterChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  
   const updateFilter = (key: keyof FilterOptions, value: any) => {
     onFilterChange({ ...filters, [key]: value });
   };
 
-  return (
-    <div className="bg-white rounded-lg shadow-lg p-6 h-fit sticky top-28">
+  const FilterContent = () => (
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 h-fit">
       <h3 className="text-lg font-semibold text-gray-800 mb-6">Filtres</h3>
       
       {/* Price range */}
@@ -111,6 +113,52 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, onFilterChange }) => {
         Réinitialiser les filtres
       </button>
     </div>
+  );
+
+  return (
+    <>
+      {/* Mobile Filter Button */}
+      <div className="lg:hidden mb-4">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <Filter className="w-4 h-4" />
+          <span>Filtres</span>
+        </button>
+      </div>
+
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block sticky top-28">
+        <FilterContent />
+      </div>
+
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center sm:justify-center">
+          <div className="w-full sm:w-96 sm:max-h-[90vh] bg-white sm:rounded-lg overflow-y-auto">
+            <div className="p-4 border-b flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Filtres</h3>
+              <button 
+                onClick={() => setIsOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4">
+              <FilterContent />
+              <button
+                onClick={() => setIsOpen(false)}
+                className="w-full mt-4 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Appliquer les filtres
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

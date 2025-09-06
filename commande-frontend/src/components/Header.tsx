@@ -115,9 +115,9 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
             </div>
           </div>
 
-          {/* Search bar */}
-          <form onSubmit={handleSearch} className="flex-1 max-w-2xl">
-            <div className="relative group">
+          {/* Search bar - Desktop only */}
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl">
+            <div className="relative group w-full">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur-sm"></div>
               <input
                 type="text"
@@ -346,34 +346,41 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
         </div>
       </div>
 
+      {/* Mobile Search Bar - Always visible */}
+      <div className={`md:hidden px-4 pb-4 ${isScrolled ? 'bg-white/95 backdrop-blur-md' : 'bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900'}`}>
+        <form onSubmit={handleSearch} className="w-full">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-lg opacity-0 focus-within:opacity-100 transition-opacity duration-300 blur-sm"></div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Rechercher des produits..."
+              className={`relative w-full pl-4 pr-12 py-3 rounded-lg transition-all duration-300 text-gray-700 placeholder-gray-400 ${
+                isScrolled
+                  ? 'bg-gray-50 border-2 border-gray-200 focus:border-blue-500 focus:bg-white shadow-sm'
+                  : 'bg-white/95 backdrop-blur-sm border-2 border-white/30 focus:border-blue-300 focus:bg-white shadow-lg'
+              } focus:outline-none focus:scale-[1.01]`}
+            />
+            <button
+              type="submit"
+              className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-lg transition-all duration-300 ${
+                isScrolled
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-blue-500 hover:bg-blue-600 text-white'
+              } shadow-md hover:shadow-lg`}
+            >
+              <Search size={18} />
+            </button>
+          </div>
+        </form>
+      </div>
+
       {/* Mobile menu */}
       <div className={`md:hidden transition-all duration-300 overflow-hidden ${
         isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
       } ${isScrolled ? 'bg-white border-t border-gray-200' : 'bg-blue-800/95 backdrop-blur-sm'}`}>
         <div className="px-4 py-4 space-y-4">
-          {/* Mobile search */}
-          <form onSubmit={handleSearch} className="w-full">
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher..."
-                className={`w-full pl-4 pr-12 py-3 rounded-lg transition-all duration-300 ${
-                  isScrolled
-                    ? 'bg-gray-50 border border-gray-300 text-gray-700 focus:border-blue-500'
-                    : 'bg-white/90 border border-white/30 text-gray-700 focus:border-blue-300'
-                } focus:outline-none`}
-              />
-              <button
-                type="submit"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors"
-              >
-                <Search size={18} />
-              </button>
-            </div>
-          </form>
-
           {/* Mobile selectors */}
           <div className="flex gap-2">
             <select
