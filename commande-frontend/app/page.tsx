@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { AuthProvider } from '../src/contexts/AuthProvider';
 import Header from '../src/components/Header';
+import AdminAutoRedirect from '../src/components/AdminAutoRedirect';
 import { Home } from '../src/pages/Home';
 import { useCart } from '../src/hooks/useCart';
 import { LoginModal } from '../src/components/LoginModal';
@@ -32,6 +33,8 @@ export default function HomePage() {
 
   return (
     <AuthProvider>
+      {/* Si l'utilisateur est admin et connecté, le rediriger vers /admin */}
+      <AdminAutoRedirect />
       <div className="min-h-screen bg-gray-50">
         <Header
           cartItemCount={getTotalItems()}

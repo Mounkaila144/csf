@@ -240,7 +240,7 @@ class ProductController extends Controller
     {
         $products = Product::with(['category', 'subcategory'])
             ->where('is_active', true)
-            ->where('stock', '>', 0)
+            ->where('stock', '>=', 0)
             ->whereJsonContains('status', 'best_seller')
             ->orderBy('created_at', 'desc')
             ->limit(12)
@@ -256,7 +256,7 @@ class ProductController extends Controller
     {
         $products = Product::with(['category', 'subcategory'])
             ->where('is_active', true)
-            ->where('stock', '>', 0)
+            ->where('stock', '>=', 0)
             ->whereJsonContains('status', 'new')
             ->orderBy('created_at', 'desc')
             ->limit(12)
@@ -272,7 +272,7 @@ class ProductController extends Controller
     {
         $products = Product::with(['category', 'subcategory'])
             ->where('is_active', true)
-            ->where('stock', '>', 0)
+            ->where('stock', '>=', 0)
             ->whereJsonContains('status', 'on_sale')
             ->orderBy('created_at', 'desc')
             ->limit(12)
@@ -297,7 +297,7 @@ class ProductController extends Controller
 
         $products = Product::with(['category', 'subcategory'])
             ->where('is_active', true)
-            ->where('stock', '>', 0)
+            ->where('stock', '>=', 0)
             ->whereJsonContains('status', $status)
             ->orderBy('created_at', 'desc')
             ->paginate(15);

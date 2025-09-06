@@ -7,7 +7,7 @@ import { publicService, PublicProduct } from '../services/publicService';
 interface StatusSectionsProps {
   onAddToCart: (product: Product) => void;
   onToggleFavorite: (productId: string) => void;
-  favorites: Set<string>;
+  favorites: string[];
 }
 
 const StatusSections: React.FC<StatusSectionsProps> = ({
@@ -36,40 +36,67 @@ const StatusSections: React.FC<StatusSectionsProps> = ({
 
   const loadProductsByStatus = async () => {
     try {
-      const serviceMap = {
-        best_seller: publicService.getBestSellers,
-        new: publicService.getNewProducts,
-        on_sale: publicService.getOnSaleProducts
-      };
-
+      console.log('🔍 Début du chargement des produits par statut...');
+      
       const promises = PRODUCT_STATUSES.map(async (status) => {
         try {
-          const serviceMethod = serviceMap[status.value];
-          const response = await serviceMethod();
-          const convertedProducts = response.data.map((product: PublicProduct) =>
-            publicService.convertToFrontendProduct(product)
-          );
+          console.log(`📡 Chargement des produits pour le statut: ${status.value} (${status.label})`);
+          
+          let response;
+          switch (status.value) {
+            case 'best_seller':
+              response = await publicService.getBestSellers();
+              break;
+            case 'new':
+              response = await publicService.getNewProducts();
+              break;
+            case 'on_sale':
+              response = await publicService.getOnSaleProducts();
+              break;
+            default:
+              throw new Error(`Statut non supporté: ${status.value}`);
+          }
+          
+          console.log(`✅ Réponse API pour ${status.value}:`, response);
+          console.log(`📊 Nombre de produits récupérés pour ${status.value}:`, response.data.length);
+          
+          const convertedProducts = response.data.map((product: PublicProduct) => {
+            const converted = publicService.convertToFrontendProduct(product);
+            console.log(`🔄 Produit converti:`, {
+              id: converted.id,
+              name: converted.name,
+              status: product.status,
+              convertedStatus: converted.status
+            });
+            return converted;
+          });
+          
+          console.log(`✨ Produits convertis pour ${status.value}:`, convertedProducts);
+          
           return { status: status.value, products: convertedProducts };
         } catch (error) {
-          console.error(`Erreur lors du chargement des produits ${status.label}:`, error);
+          console.error(`❌ Erreur lors du chargement des produits ${status.label}:`, error);
           return { status: status.value, products: [] };
         }
       });
 
       const results = await Promise.all(promises);
+      console.log('📦 Tous les résultats:', results);
       
       const newProductsData = { ...productsData };
       const newLoading = { ...loading };
       
       results.forEach(({ status, products }) => {
+        console.log(`🎯 Attribution des produits pour ${status}:`, products.length, 'produits');
         newProductsData[status] = products.slice(0, 8); // Limiter à 8 produits par section
         newLoading[status] = false;
       });
 
+      console.log('🏁 Données finales:', newProductsData);
       setProductsData(newProductsData);
       setLoading(newLoading);
     } catch (error) {
-      console.error('Erreur lors du chargement des produits par statut:', error);
+      console.error('💥 Erreur globale lors du chargement des produits par statut:', error);
       // Set all loading to false in case of global error
       setLoading({
         best_seller: false,
@@ -90,12 +117,12 @@ const StatusSections: React.FC<StatusSectionsProps> = ({
         <button
           onClick={() => onToggleFavorite(product.id)}
           className={`absolute top-2 right-2 p-2 rounded-full shadow-md transition-colors ${
-            favorites.has(product.id)
+            favorites.includes(product.id)
               ? 'bg-red-500 text-white'
               : 'bg-white text-gray-600 hover:text-red-500'
           }`}
         >
-          <Heart className={`w-4 h-4 ${favorites.has(product.id) ? 'fill-current' : ''}`} />
+          <Heart className={`w-4 h-4 ${favorites.includes(product.id) ? 'fill-current' : ''}`} />
         </button>
         {product.isPromo && (
           <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-xs font-bold rounded">
@@ -128,11 +155,11 @@ const StatusSections: React.FC<StatusSectionsProps> = ({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
             <span className="text-lg font-bold text-blue-600">
-              {product.price.toFixed(2)} €
+              {product.price.toFixed(2)} CFA
             </span>
             {product.originalPrice && product.originalPrice > product.price && (
               <span className="text-sm text-gray-500 line-through">
-                {product.originalPrice.toFixed(2)} €
+                {product.originalPrice.toFixed(2)} CFA
               </span>
             )}
           </div>
@@ -154,7 +181,17 @@ const StatusSections: React.FC<StatusSectionsProps> = ({
     const products = productsData[status];
     const isLoading = loading[status];
 
-    if (!statusInfo) return null;
+    console.log(`🎨 Rendu de StatusSection pour ${status}:`, {
+      statusInfo,
+      products,
+      productsLength: products?.length,
+      isLoading
+    });
+
+    if (!statusInfo) {
+      console.log(`❌ StatusInfo non trouvé pour: ${status}`);
+      return null;
+    }
 
     return (
       <section className="mb-12">

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Modal } from './Modal';
+import { authService } from '../services/authService';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -15,6 +17,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onSwitchToRegister
 }) => {
   const { login, error, isLoading, clearError } = useAuth();
+  const router = useRouter();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -64,6 +67,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     try {
       await login(formData);
       onClose();
+      // Si l'utilisateur est admin après connexion, rediriger vers /admin
+      const u = authService.getUser();
+      if (u?.role === 'admin') {
+        router.replace('/admin');
+      }
       // Reset form
       setFormData({ email: '', password: '' });
       setErrors({});

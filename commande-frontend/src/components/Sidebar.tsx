@@ -18,7 +18,7 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, onFilterChange }) => {
       
       {/* Price range */}
       <div className="mb-6">
-        <h4 className="font-medium text-gray-700 mb-3">Prix (€)</h4>
+        <h4 className="font-medium text-gray-700 mb-3">Prix (CFA)</h4>
         <div className="space-y-3">
           <div className="flex gap-2">
             <input
