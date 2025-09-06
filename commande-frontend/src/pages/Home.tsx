@@ -3,7 +3,7 @@ import CategoryMenu from '../components/CategoryMenu';
 import Banner from '../components/Banner';
 import Sidebar from '../components/Sidebar';
 import ProductGrid from '../components/ProductGrid';
-import FeaturedSections from '../components/FeaturedSections';
+import StatusSections from '../components/StatusSections';
 import Footer from '../components/Footer';
 import WhatsAppButton from '../components/WhatsAppButton';
 import { banners } from '../data/mockData'; // On garde les banners mockées pour l'instant
@@ -197,9 +197,8 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
         </div>
       </div>
       
-      {/* Featured Sections */}
-      <FeaturedSections
-        products={featuredProducts}
+      {/* Status Sections */}
+      <StatusSections
         onAddToCart={addToCart}
         onToggleFavorite={toggleFavorite}
         favorites={favorites}

@@ -1,4 +1,5 @@
 import { getFullImageUrl } from './adminService';
+import { ProductStatus } from '../types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -10,6 +11,7 @@ export interface PublicProduct {
   price: number;
   images?: string[];
   stock: number;
+  status?: ProductStatus[];
   category_id: number;
   subcategory_id?: number;
   is_active: boolean;
@@ -139,6 +141,50 @@ class PublicService {
     return this.handleResponse<ApiResponse<PublicProduct[]>>(response);
   }
 
+  async getBestSellers(): Promise<ApiResponse<PublicProduct[]>> {
+    const response = await fetch(`${API_BASE_URL}/products/best-sellers/list`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    return this.handleResponse<ApiResponse<PublicProduct[]>>(response);
+  }
+
+  async getNewProducts(): Promise<ApiResponse<PublicProduct[]>> {
+    const response = await fetch(`${API_BASE_URL}/products/new/list`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    return this.handleResponse<ApiResponse<PublicProduct[]>>(response);
+  }
+
+  async getOnSaleProducts(): Promise<ApiResponse<PublicProduct[]>> {
+    const response = await fetch(`${API_BASE_URL}/products/on-sale/list`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    return this.handleResponse<ApiResponse<PublicProduct[]>>(response);
+  }
+
+  async getProductsByStatus(status: ProductStatus): Promise<PaginatedResponse<PublicProduct>> {
+    const response = await fetch(`${API_BASE_URL}/products/status/${status}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    return this.handleResponse<PaginatedResponse<PublicProduct>>(response);
+  }
+
   // ==================== CATEGORIES ====================
   
   async getActiveCategories(): Promise<ApiResponse<PublicCategory[]>> {
@@ -178,6 +224,7 @@ class PublicService {
   
   // Convertir un produit de l'API vers le format attendu par les composants existants
   convertToFrontendProduct(apiProduct: PublicProduct): any {
+    const status = apiProduct.status || [];
     return {
       id: apiProduct.id.toString(),
       name: apiProduct.name,
@@ -190,10 +237,11 @@ class PublicService {
       categoryId: apiProduct.category_id.toString(),
       subcategoryId: apiProduct.subcategory_id?.toString(),
       subcategory: apiProduct.subcategory?.name,
-      isNew: false, // À calculer basé sur la date de création
-      isPromo: false, // À implémenter dans l'API
-      isBestSeller: false, // À calculer basé sur les ventes
+      isNew: status.includes('new'),
+      isPromo: status.includes('on_sale'),
+      isBestSeller: status.includes('best_seller'),
       freeShipping: false, // À implémenter dans l'API
+      status: status, // Ajout du champ status
     };
   }
 

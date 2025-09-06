@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AdminProduct, ProductFormData, AdminCategory, AdminSubcategory } from '../../types';
+import { AdminProduct, ProductFormData, AdminCategory, AdminSubcategory, ProductStatus } from '../../types';
 import { adminService, getFullImageUrl } from '../../services/adminService';
+import { PRODUCT_STATUSES } from '../../constants/productStatus';
 
 interface ProductFormProps {
   product?: AdminProduct;
@@ -27,7 +28,8 @@ export default function ProductForm({
     subcategory_id: 0,
     images: [],
     is_active: true,
-    stock: 0
+    stock: 0,
+    status: []
   });
 
   const [subcategories, setSubcategories] = useState<AdminSubcategory[]>([]);
@@ -46,7 +48,8 @@ export default function ProductForm({
         subcategory_id: product.subcategory_id || 0,
         images: product.images || [],
         is_active: product.is_active,
-        stock: product.stock
+        stock: product.stock,
+        status: product.status || []
       });
       
       if (product.images && product.images.length > 0) {
@@ -155,6 +158,18 @@ export default function ProductForm({
     }
   };
 
+  const handleStatusChange = (statusValue: ProductStatus) => {
+    const currentStatus = formData.status || [];
+    const newStatus = currentStatus.includes(statusValue)
+      ? currentStatus.filter(s => s !== statusValue)
+      : [...currentStatus, statusValue];
+    
+    setFormData(prev => ({
+      ...prev,
+      status: newStatus
+    }));
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -218,23 +233,6 @@ export default function ProductForm({
             {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price}</p>}
           </div>
 
-          {/* Prix original */}
-          <div>
-            <label htmlFor="original_price" className="block text-sm font-medium text-gray-700 mb-2">
-              Prix original
-            </label>
-            <input
-              type="number"
-              id="original_price"
-              name="original_price"
-              value={formData.original_price}
-              onChange={handleChange}
-              step="0.01"
-              min="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isLoading}
-            />
-          </div>
 
           {/* Quantité en stock */}
           <div>
@@ -346,40 +344,48 @@ export default function ProductForm({
           {errors.image && <p className="mt-1 text-sm text-red-600">{errors.image}</p>}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Statut */}
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-              Statut
-            </label>
-            <select
-              id="status"
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isLoading}
-            >
-              <option value="active">Actif</option>
-              <option value="inactive">Inactif</option>
-            </select>
+        {/* Statuts */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-4">
+            Statuts du produit
+          </label>
+          <div className="space-y-3">
+            {PRODUCT_STATUSES.map((status) => (
+              <div key={status.value} className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={`status_${status.value}`}
+                  checked={formData.status?.includes(status.value) || false}
+                  onChange={() => handleStatusChange(status.value)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  disabled={isLoading}
+                />
+                <label 
+                  htmlFor={`status_${status.value}`} 
+                  className="ml-3 flex items-center space-x-2"
+                >
+                  <span className="text-xl">{status.emoji}</span>
+                  <span className="text-sm font-medium text-gray-700">{status.label}</span>
+                </label>
+              </div>
+            ))}
           </div>
+        </div>
 
-          {/* Produit vedette */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="is_featured"
-              name="is_featured"
-              checked={formData.is_featured}
-              onChange={handleChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              disabled={isLoading}
-            />
-            <label htmlFor="is_featured" className="ml-2 block text-sm text-gray-700">
-              Produit vedette
-            </label>
-          </div>
+        {/* Actif/Inactif */}
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="is_active"
+            name="is_active"
+            checked={formData.is_active}
+            onChange={handleChange}
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            disabled={isLoading}
+          />
+          <label htmlFor="is_active" className="ml-2 block text-sm text-gray-700">
+            Produit actif
+          </label>
         </div>
 
         {/* Boutons */}

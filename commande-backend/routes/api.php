@@ -60,6 +60,10 @@ Route::get('subcategories/category/{categoryId}', [SubcategoryController::class,
 Route::get('products', [ProductController::class, 'index']);
 Route::get('products/{product}', [ProductController::class, 'show']);
 Route::get('products/featured/list', [ProductController::class, 'getFeaturedProducts']);
+Route::get('products/best-sellers/list', [ProductController::class, 'getBestSellers']);
+Route::get('products/new/list', [ProductController::class, 'getNewProducts']);
+Route::get('products/on-sale/list', [ProductController::class, 'getOnSaleProducts']);
+Route::get('products/status/{status}', [ProductController::class, 'getProductsByStatus']);
 
 // Admin only routes - use only role middleware which handles JWT auth internally
 Route::middleware(['role:admin'])->prefix('admin')->group(function () {

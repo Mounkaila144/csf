@@ -1,3 +1,13 @@
+// Types pour les statuts des produits
+export type ProductStatus = 'best_seller' | 'new' | 'on_sale';
+
+export interface ProductStatusInfo {
+  value: ProductStatus;
+  label: string;
+  emoji: string;
+  color: string;
+}
+
 // Types pour l'affichage frontend (existants)
 export interface Product {
   id: string;
@@ -37,6 +47,7 @@ export interface AdminProduct {
   images?: string[];
   is_active: boolean;
   stock: number;
+  status?: ProductStatus[];
   created_at: string;
   updated_at: string;
   category?: AdminCategory;
@@ -92,6 +103,7 @@ export interface ProductFormData {
   images?: string[];
   is_active: boolean;
   stock: number;
+  status?: ProductStatus[];
 }
 
 // Types pour les filtres et recherche

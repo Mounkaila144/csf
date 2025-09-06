@@ -17,13 +17,15 @@ class Product extends Model
         'stock',
         'category_id',
         'subcategory_id',
-        'is_active'
+        'is_active',
+        'status'
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'images' => 'array',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
+        'status' => 'array'
     ];
 
     public function category()
@@ -48,5 +50,44 @@ class Product extends Model
             return true;
         }
         return false;
+    }
+
+    public function hasStatus($status)
+    {
+        return in_array($status, $this->status ?? []);
+    }
+
+    public function isBestSeller()
+    {
+        return $this->hasStatus('best_seller');
+    }
+
+    public function isNew()
+    {
+        return $this->hasStatus('new');
+    }
+
+    public function isOnSale()
+    {
+        return $this->hasStatus('on_sale');
+    }
+
+    public function addStatus($status)
+    {
+        $statuses = $this->status ?? [];
+        if (!in_array($status, $statuses)) {
+            $statuses[] = $status;
+            $this->status = $statuses;
+        }
+        return $this;
+    }
+
+    public function removeStatus($status)
+    {
+        $statuses = $this->status ?? [];
+        $this->status = array_values(array_filter($statuses, function($s) use ($status) {
+            return $s !== $status;
+        }));
+        return $this;
     }
 }

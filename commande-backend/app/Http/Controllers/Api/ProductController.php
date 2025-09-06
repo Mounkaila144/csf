@@ -54,6 +54,12 @@ class ProductController extends Controller
             $query->where('stock', '>', 0);
         }
 
+        // Filter by status
+        if ($request->has('status_filter')) {
+            $statusFilter = $request->status_filter;
+            $query->whereJsonContains('status', $statusFilter);
+        }
+
         // Sort products
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
@@ -87,7 +93,9 @@ class ProductController extends Controller
             'subcategory_id' => 'nullable|exists:subcategories,id',
             'images' => 'nullable|array',
             'images.*' => 'string',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'status' => 'nullable|array',
+            'status.*' => 'in:best_seller,new,on_sale'
         ]);
 
         if ($validator->fails()) {
@@ -98,7 +106,7 @@ class ProductController extends Controller
             ], 400);
         }
 
-        $productData = $request->only(['name', 'description', 'price', 'stock', 'category_id', 'subcategory_id', 'is_active', 'images']);
+        $productData = $request->only(['name', 'description', 'price', 'stock', 'category_id', 'subcategory_id', 'is_active', 'images', 'status']);
 
         $product = Product::create($productData);
         $product->load(['category', 'subcategory']);
@@ -132,6 +140,8 @@ class ProductController extends Controller
             'images' => 'nullable|array',
             'images.*' => 'string',
             'is_active' => 'boolean',
+            'status' => 'nullable|array',
+            'status.*' => 'in:best_seller,new,on_sale',
             'remove_images' => 'nullable|array',
             'remove_images.*' => 'string'
         ]);
@@ -144,7 +154,7 @@ class ProductController extends Controller
             ], 400);
         }
 
-        $productData = $request->only(['name', 'description', 'price', 'stock', 'category_id', 'subcategory_id', 'is_active', 'images']);
+        $productData = $request->only(['name', 'description', 'price', 'stock', 'category_id', 'subcategory_id', 'is_active', 'images', 'status']);
 
         $product->update($productData);
         $product->load(['category', 'subcategory']);
@@ -223,6 +233,86 @@ class ProductController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $products
+        ]);
+    }
+
+    public function getBestSellers()
+    {
+        $products = Product::with(['category', 'subcategory'])
+            ->where('is_active', true)
+            ->where('stock', '>', 0)
+            ->whereJsonContains('status', 'best_seller')
+            ->orderBy('created_at', 'desc')
+            ->limit(12)
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $products
+        ]);
+    }
+
+    public function getNewProducts()
+    {
+        $products = Product::with(['category', 'subcategory'])
+            ->where('is_active', true)
+            ->where('stock', '>', 0)
+            ->whereJsonContains('status', 'new')
+            ->orderBy('created_at', 'desc')
+            ->limit(12)
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $products
+        ]);
+    }
+
+    public function getOnSaleProducts()
+    {
+        $products = Product::with(['category', 'subcategory'])
+            ->where('is_active', true)
+            ->where('stock', '>', 0)
+            ->whereJsonContains('status', 'on_sale')
+            ->orderBy('created_at', 'desc')
+            ->limit(12)
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $products
+        ]);
+    }
+
+    public function getProductsByStatus($status)
+    {
+        $allowedStatuses = ['best_seller', 'new', 'on_sale'];
+        
+        if (!in_array($status, $allowedStatuses)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid status. Allowed statuses: ' . implode(', ', $allowedStatuses)
+            ], 400);
+        }
+
+        $products = Product::with(['category', 'subcategory'])
+            ->where('is_active', true)
+            ->where('stock', '>', 0)
+            ->whereJsonContains('status', $status)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $products->items(),
+            'meta' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'per_page' => $products->perPage(),
+                'total' => $products->total(),
+                'from' => $products->firstItem(),
+                'to' => $products->lastItem()
+            ]
         ]);
     }
 }
