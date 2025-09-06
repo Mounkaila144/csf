@@ -101,7 +101,8 @@ return [
     |
     */
 
-    'ttl' => env('JWT_TTL', 60),
+    // Durée de vie du token (en minutes). 60*24*30 = 43200 ≈ 1 mois
+    'ttl' => env('JWT_TTL', 43200),
 
     /*
     |--------------------------------------------------------------------------
@@ -120,7 +121,9 @@ return [
     |
     */
 
-    'refresh_ttl' => env('JWT_REFRESH_TTL', 20160),
+    // Fenêtre de rafraîchissement (en minutes). Doit être >= ttl
+    // Ici ~2 mois pour permettre le refresh pendant toute la durée + marge
+    'refresh_ttl' => env('JWT_REFRESH_TTL', 86400),
 
     /*
     |--------------------------------------------------------------------------
