@@ -70,7 +70,7 @@ Route::middleware(['role:admin'])->prefix('admin')->group(function () {
     Route::apiResource('subcategories', SubcategoryController::class);
     
     // Products management
-    Route::apiResource('products', ProductController::class)->except(['index', 'show']);
+    Route::apiResource('products', ProductController::class);
     Route::patch('products/{product}/stock', [ProductController::class, 'updateStock']);
     Route::get('products/low-stock/list', [ProductController::class, 'getLowStockProducts']);
 });

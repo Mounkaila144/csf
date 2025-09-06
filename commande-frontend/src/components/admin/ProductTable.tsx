@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { AdminProduct } from '../../types';
+import { getFullImageUrl } from '../../services/adminService';
 
 interface ProductTableProps {
   products: AdminProduct[];
@@ -111,10 +112,10 @@ export default function ProductTable({
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10">
-                      {product.image ? (
+                      {product.images && product.images.length > 0 ? (
                         <img
                           className="h-10 w-10 rounded-md object-cover"
-                          src={product.image}
+                          src={getFullImageUrl(product.images[0])}
                           alt={product.name}
                         />
                       ) : (

@@ -1,4 +1,15 @@
-const API_BASE_URL = 'http://localhost:8000/api';
+import { ProductFormData, AdminProduct } from '../types';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+
+// Fonction helper pour construire les URLs complètes des images
+export const getFullImageUrl = (imagePath: string): string => {
+  if (imagePath.startsWith('http')) {
+    return imagePath; // Déjà une URL complète
+  }
+  return `${BACKEND_URL}${imagePath}`;
+};
 
 // Types pour les réponses API
 export interface ApiResponse<T> {
@@ -51,28 +62,6 @@ export interface Subcategory extends SubcategoryData {
   products_count?: number;
 }
 
-// Types pour les produits
-export interface ProductData {
-  id?: number;
-  name: string;
-  description?: string;
-  price: number;
-  original_price?: number;
-  category_id: number;
-  subcategory_id?: number;
-  image?: string;
-  status: 'active' | 'inactive';
-  is_featured: boolean;
-  stock_quantity: number;
-}
-
-export interface Product extends ProductData {
-  id: number;
-  created_at: string;
-  updated_at: string;
-  category?: Category;
-  subcategory?: Subcategory;
-}
 
 class AdminService {
   private getToken(): string | null {
@@ -211,8 +200,8 @@ class AdminService {
     subcategory_id?: number;
     status?: string;
     search?: string;
-  }): Promise<PaginatedResponse<Product>> {
-    let url = `${API_BASE_URL}/products?page=${page}&per_page=${perPage}`;
+  }): Promise<PaginatedResponse<AdminProduct>> {
+    let url = `${API_BASE_URL}/admin/products?page=${page}&per_page=${perPage}`;
     
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -227,36 +216,36 @@ class AdminService {
       headers: this.getHeaders(),
     });
     
-    return this.handleResponse<PaginatedResponse<Product>>(response);
+    return this.handleResponse<PaginatedResponse<AdminProduct>>(response);
   }
 
-  async getProduct(id: number): Promise<ApiResponse<Product>> {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+  async getProduct(id: number): Promise<ApiResponse<AdminProduct>> {
+    const response = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
       method: 'GET',
       headers: this.getHeaders(),
     });
     
-    return this.handleResponse<ApiResponse<Product>>(response);
+    return this.handleResponse<ApiResponse<AdminProduct>>(response);
   }
 
-  async createProduct(data: ProductFormData): Promise<ApiResponse<Product>> {
+  async createProduct(data: ProductFormData): Promise<ApiResponse<AdminProduct>> {
     const response = await fetch(`${API_BASE_URL}/admin/products`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
     });
     
-    return this.handleResponse<ApiResponse<Product>>(response);
+    return this.handleResponse<ApiResponse<AdminProduct>>(response);
   }
 
-  async updateProduct(id: number, data: ProductFormData): Promise<ApiResponse<Product>> {
+  async updateProduct(id: number, data: ProductFormData): Promise<ApiResponse<AdminProduct>> {
     const response = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
       method: 'PUT',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
     });
     
-    return this.handleResponse<ApiResponse<Product>>(response);
+    return this.handleResponse<ApiResponse<AdminProduct>>(response);
   }
 
   async deleteProduct(id: number): Promise<ApiResponse<null>> {

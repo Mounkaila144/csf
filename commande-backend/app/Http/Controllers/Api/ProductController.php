@@ -12,8 +12,19 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'subcategory'])
-            ->where('is_active', true);
+        $query = Product::with(['category', 'subcategory']);
+        
+        // Si c'est pour l'admin (route /api/admin/products), on montre tous les produits
+        // Si c'est pour le public (route /api/products), on filtre les actifs
+        if (str_contains($request->getPathInfo(), '/admin/')) {
+            // Route admin - montrer tous les produits
+            if ($request->has('status')) {
+                $query->where('is_active', $request->status === 'active');
+            }
+        } else {
+            // Route publique - montrer seulement les actifs
+            $query->where('is_active', true);
+        }
 
         // Filter by category
         if ($request->has('category_id')) {
@@ -52,7 +63,16 @@ class ProductController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $products
+            'message' => 'Products retrieved successfully',
+            'data' => $products->items(),
+            'meta' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'per_page' => $products->perPage(),
+                'total' => $products->total(),
+                'from' => $products->firstItem(),
+                'to' => $products->lastItem()
+            ]
         ]);
     }
 
@@ -66,7 +86,7 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'subcategory_id' => 'nullable|exists:subcategories,id',
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'string',
             'is_active' => 'boolean'
         ]);
 
@@ -78,17 +98,7 @@ class ProductController extends Controller
             ], 400);
         }
 
-        $productData = $request->only(['name', 'description', 'price', 'stock', 'category_id', 'subcategory_id', 'is_active']);
-
-        // Handle multiple image uploads
-        $imagePaths = [];
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $imagePath = $image->store('products', 'public');
-                $imagePaths[] = $imagePath;
-            }
-        }
-        $productData['images'] = $imagePaths;
+        $productData = $request->only(['name', 'description', 'price', 'stock', 'category_id', 'subcategory_id', 'is_active', 'images']);
 
         $product = Product::create($productData);
         $product->load(['category', 'subcategory']);
@@ -120,7 +130,7 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'subcategory_id' => 'nullable|exists:subcategories,id',
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'string',
             'is_active' => 'boolean',
             'remove_images' => 'nullable|array',
             'remove_images.*' => 'string'
@@ -134,28 +144,7 @@ class ProductController extends Controller
             ], 400);
         }
 
-        $productData = $request->only(['name', 'description', 'price', 'stock', 'category_id', 'subcategory_id', 'is_active']);
-
-        // Handle image removal
-        $currentImages = $product->images ?? [];
-        if ($request->has('remove_images')) {
-            foreach ($request->remove_images as $imageToRemove) {
-                if (in_array($imageToRemove, $currentImages)) {
-                    Storage::disk('public')->delete($imageToRemove);
-                    $currentImages = array_diff($currentImages, [$imageToRemove]);
-                }
-            }
-        }
-
-        // Handle new image uploads
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $imagePath = $image->store('products', 'public');
-                $currentImages[] = $imagePath;
-            }
-        }
-
-        $productData['images'] = array_values($currentImages);
+        $productData = $request->only(['name', 'description', 'price', 'stock', 'category_id', 'subcategory_id', 'is_active', 'images']);
 
         $product->update($productData);
         $product->load(['category', 'subcategory']);

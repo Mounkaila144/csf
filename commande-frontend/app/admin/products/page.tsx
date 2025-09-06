@@ -255,7 +255,7 @@ export default function ProductsPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Produits actifs</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {Array.isArray(products) ? products.filter(p => p.status === 'active').length : 0}
+                  {Array.isArray(products) ? products.filter(p => p.is_active).length : 0}
                 </p>
               </div>
             </div>
@@ -271,7 +271,7 @@ export default function ProductsPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Produits vedettes</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {Array.isArray(products) ? products.filter(p => p.is_featured).length : 0}
+                  0
                 </p>
               </div>
             </div>

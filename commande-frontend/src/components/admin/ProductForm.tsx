@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AdminProduct, ProductFormData, AdminCategory, AdminSubcategory } from '../../types';
-import { adminService } from '../../services/adminService';
+import { adminService, getFullImageUrl } from '../../services/adminService';
 
 interface ProductFormProps {
   product?: AdminProduct;
@@ -42,17 +42,15 @@ export default function ProductForm({
         name: product.name,
         description: product.description || '',
         price: product.price,
-        original_price: product.original_price || 0,
         category_id: product.category_id,
         subcategory_id: product.subcategory_id || 0,
-        image: product.image || '',
-        status: product.status,
-        is_featured: product.is_featured,
+        images: product.images || [],
+        is_active: product.is_active,
         stock: product.stock
       });
       
-      if (product.image) {
-        setImagePreview(product.image);
+      if (product.images && product.images.length > 0) {
+        setImagePreview(getFullImageUrl(product.images[0]));
       }
       
       // Charger les sous-catégories si une catégorie est sélectionnée
@@ -109,7 +107,7 @@ export default function ProductForm({
         setUploadingImage(true);
         try {
           const uploadResponse = await adminService.uploadImage(imageFile);
-          finalFormData.image = uploadResponse.data.url;
+          finalFormData.images = [uploadResponse.data.url];
         } catch (error) {
           console.error('Erreur lors de l\'upload de l\'image:', error);
           setErrors({ image: 'Erreur lors de l\'upload de l\'image' });

@@ -41,7 +41,7 @@ export interface AdminCategory {
   id: number;
   name: string;
   description?: string;
-  is_active: boolean;
+  status: 'active' | 'inactive';
   image?: string;
   created_at: string;
   updated_at: string;
@@ -53,7 +53,7 @@ export interface AdminSubcategory {
   name: string;
   description?: string;
   category_id: number;
-  is_active: boolean;
+  status: 'active' | 'inactive';
   image?: string;
   created_at: string;
   updated_at: string;
@@ -65,7 +65,7 @@ export interface AdminSubcategory {
 export interface CategoryFormData {
   name: string;
   description?: string;
-  is_active: boolean;
+  status: 'active' | 'inactive';
   image?: string;
 }
 
@@ -73,7 +73,7 @@ export interface SubcategoryFormData {
   name: string;
   description?: string;
   category_id: number;
-  is_active: boolean;
+  status: 'active' | 'inactive';
   image?: string;
 }
 
