@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SubcategoryController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\UploadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,6 +73,12 @@ Route::middleware(['role:admin'])->prefix('admin')->group(function () {
     Route::apiResource('products', ProductController::class)->except(['index', 'show']);
     Route::patch('products/{product}/stock', [ProductController::class, 'updateStock']);
     Route::get('products/low-stock/list', [ProductController::class, 'getLowStockProducts']);
+});
+
+// Upload routes (admin only)
+Route::middleware(['role:admin'])->group(function () {
+    Route::post('upload/image', [UploadController::class, 'uploadImage']);
+    Route::delete('upload/image', [UploadController::class, 'deleteImage']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

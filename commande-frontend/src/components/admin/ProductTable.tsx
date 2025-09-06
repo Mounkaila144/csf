@@ -157,28 +157,26 @@ export default function ProductTable({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className={`text-sm ${
-                    product.stock_quantity > 10 
+                    product.stock > 10 
                       ? 'text-green-600' 
-                      : product.stock_quantity > 0 
+                      : product.stock > 0 
                         ? 'text-yellow-600' 
                         : 'text-red-600'
                   }`}>
-                    {product.stock_quantity}
+                    {product.stock}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <select
-                    value={product.status}
-                    onChange={(e) => onStatusChange(product.id, e.target.value as 'active' | 'inactive')}
-                    className={`text-xs px-2 py-1 rounded-full border-0 focus:ring-2 focus:ring-blue-500 ${
-                      product.status === 'active'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                  <button
+                    onClick={() => onStatusChange(product.id, product.is_active ? 'inactive' : 'active')}
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
+                      product.is_active
+                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                        : 'bg-red-100 text-red-800 hover:bg-red-200'
                     }`}
                   >
-                    <option value="active">Actif</option>
-                    <option value="inactive">Inactif</option>
-                  </select>
+                    {product.is_active ? 'Actif' : 'Inactif'}
+                  </button>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {product.is_featured ? (

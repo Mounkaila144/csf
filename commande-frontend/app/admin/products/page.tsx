@@ -59,8 +59,19 @@ export default function ProductsPage() {
           category_id: filters.category_id
         }
       );
-      setProducts(response.data);
-      setMeta(response.meta);
+      // Normalise la réponse pour garantir un tableau
+      setProducts(Array.isArray(response.data) ? response.data : (response.data ? [response.data as unknown as AdminProduct] : []));
+      // Assure que meta est toujours défini pour éviter les erreurs d'accès
+      setMeta(
+        response.meta ?? {
+          current_page: filters.page || 1,
+          last_page: 1,
+          per_page: filters.per_page || 10,
+          total: response.data?.length ?? 0,
+          from: 0,
+          to: 0
+        }
+      );
     } catch (error) {
       console.error('Erreur lors du chargement des produits:', error);
     } finally {
@@ -229,7 +240,7 @@ export default function ProductsPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total produits</p>
-                <p className="text-2xl font-bold text-gray-900">{meta.total}</p>
+                <p className="text-2xl font-bold text-gray-900">{meta?.total ?? 0}</p>
               </div>
             </div>
           </div>
@@ -244,7 +255,7 @@ export default function ProductsPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Produits actifs</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {products.filter(p => p.status === 'active').length}
+                  {Array.isArray(products) ? products.filter(p => p.status === 'active').length : 0}
                 </p>
               </div>
             </div>
@@ -260,7 +271,7 @@ export default function ProductsPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Produits vedettes</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {products.filter(p => p.is_featured).length}
+                  {Array.isArray(products) ? products.filter(p => p.is_featured).length : 0}
                 </p>
               </div>
             </div>
@@ -277,7 +288,7 @@ export default function ProductsPage() {
         />
 
         {/* Pagination */}
-        {meta.last_page > 1 && (
+        {meta?.last_page > 1 && (
           <Pagination
             meta={meta}
             onPageChange={handlePageChange}

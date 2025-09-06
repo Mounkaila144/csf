@@ -26,13 +26,11 @@ export interface AdminProduct {
   name: string;
   description?: string;
   price: number;
-  original_price?: number;
   category_id: number;
   subcategory_id?: number;
-  image?: string;
-  status: 'active' | 'inactive';
-  is_featured: boolean;
-  stock_quantity: number;
+  images?: string[];
+  is_active: boolean;
+  stock: number;
   created_at: string;
   updated_at: string;
   category?: AdminCategory;
@@ -83,13 +81,11 @@ export interface ProductFormData {
   name: string;
   description?: string;
   price: number;
-  original_price?: number;
   category_id: number;
   subcategory_id?: number;
-  image?: string;
-  status: 'active' | 'inactive';
-  is_featured: boolean;
-  stock_quantity: number;
+  images?: string[];
+  is_active: boolean;
+  stock: number;
 }
 
 // Types pour les filtres et recherche

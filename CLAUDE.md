@@ -4,42 +4,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-This is a full-stack e-commerce application with a React/TypeScript frontend and Laravel backend:
+This is a full-stack e-commerce application with a Next.js TypeScript frontend and Laravel backend:
 
-### Frontend (React + TypeScript + Vite)
-- **Main App**: `src/App.tsx` - Main application component with state management for cart, favorites, search, and filtering
-- **Components**: `src/components/` - Modular UI components (Header, ProductGrid, CategoryMenu, etc.)
-- **Data Layer**: `src/data/mockData.ts` - Mock data for products, categories, and banners
-- **Hooks**: `src/hooks/` - Custom React hooks for cart (`useCart`) and favorites (`useFavorites`) functionality
+### Frontend (Next.js + TypeScript)
+- **Location**: `commande-frontend/` directory
+- **Framework**: Next.js 15 with React 19 and TypeScript
+- **Main App**: Uses App Router architecture with `app/` directory
+- **Components**: `src/components/` - Modular UI components including admin interfaces
+- **Services**: `src/services/adminService.ts` - API communication layer
+- **Hooks**: `src/hooks/` - Custom React hooks for state management
 - **Types**: `src/types/` - TypeScript type definitions
-- **Styling**: TailwindCSS with PostCSS processing
+- **Styling**: TailwindCSS with custom blue theme colors
+- **Path Aliases**: `@/` alias configured for `src/` directory
 
 ### Backend (Laravel)
 - **Location**: `commande-backend/` directory
 - **Framework**: Laravel 10 (PHP 8.1+)
-- **Standard Laravel structure**: app/, config/, database/, routes/, tests/
-- **Frontend Assets**: Uses Vite for asset bundling (Laravel Vite plugin)
+- **Authentication**: JWT authentication using `tymon/jwt-auth` with role-based access
+- **API Controllers**: `app/Http/Controllers/Api/` - REST API endpoints
+- **Key Features**: Product management, category/subcategory hierarchy, file uploads
+- **Asset Building**: Vite for Laravel frontend asset bundling
 
 ## Development Commands
 
 ### Frontend Development
 ```bash
+cd commande-frontend
+
 # Start development server
 npm run dev
 
-# Build for production  
+# Build for production
 npm run build
+
+# Start production server
+npm run start
 
 # Lint code
 npm run lint
-
-# Preview production build
-npm run preview
 ```
 
 ### Backend Development
 ```bash
-# Navigate to backend directory first
 cd commande-backend
 
 # Start Laravel development server
@@ -48,9 +54,8 @@ php artisan serve
 # Run database migrations
 php artisan migrate
 
-# Build frontend assets
-npm run dev
-npm run build
+# Fresh migration with seeders
+php artisan migrate:fresh --seed
 
 # Run tests
 php artisan test
@@ -59,34 +64,65 @@ php artisan test
 
 # Code formatting (Laravel Pint)
 ./vendor/bin/pint
+
+# Cache commands
+php artisan cache:clear
+php artisan config:clear
+
+# Asset building
+npm run dev
+npm run build
 ```
 
 ## Key Architectural Patterns
 
-### Frontend State Management
-- React hooks for local state (`useState`)
-- Custom hooks (`useCart`, `useFavorites`) for shared application state
-- Props drilling for component communication
-- Local storage integration for cart/favorites persistence
+### Authentication & Authorization
+- JWT-based authentication with role-based access control
+- Two main roles: `admin` and `client`
+- Protected routes using middleware: `auth:api` and `role:admin,client`
+- Token refresh mechanism implemented
 
-### Component Structure
-- Functional components with TypeScript
-- Lucide React icons for UI elements
-- Responsive design with TailwindCSS
-- Component-based architecture with clear separation of concerns
+### API Structure
+- RESTful API design with consistent JSON responses
+- Base URL: `http://localhost:8000/api`
+- Controllers: AuthController, ProductController, CategoryController, SubcategoryController, UploadController
+- File upload handling for product and category images
 
-### Backend Structure
-- Standard Laravel MVC architecture
-- Sanctum for API authentication
-- Eloquent ORM for database operations
-- RESTful API endpoints for frontend communication
+### Frontend Architecture
+- Next.js App Router with nested layouts
+- Admin panel at `/admin` with protected routes
+- Component-based architecture with TypeScript
+- Service layer for API communication (`adminService.ts`)
+- Custom hooks for state management
+- TailwindCSS for styling with custom color scheme
 
-## Data Flow
-- Frontend fetches data from Laravel API endpoints
-- Mock data currently used in frontend (`src/data/mockData.ts`)
-- Cart and favorites managed in frontend with localStorage persistence
-- Product filtering and search handled client-side
+### Data Management
+- Products organized in category/subcategory hierarchy
+- Image upload and management system
+- Pagination support for large datasets
+- CRUD operations for all entities
+
+## URLs and Endpoints
+
+### Default Development URLs
+- **Backend API**: http://localhost:8000
+- **Frontend**: http://localhost:3000
+- **Admin Panel**: http://localhost:3000/admin
+
+### Key API Endpoints
+- Authentication: `/api/auth/*`
+- Products: `/api/products/*`
+- Categories: `/api/categories/*`
+- Subcategories: `/api/subcategories/*`
+- File uploads: `/api/uploads/*`
+
+## File Structure Highlights
+- Frontend admin components: `src/components/admin/`
+- Backend API controllers: `app/Http/Controllers/Api/`
+- Routes: `commande-backend/routes/api.php`
+- Comprehensive API documentation: `commande-backend/API_DOCUMENTATION.md` and `CRUD_DOCUMENTATION.md`
 
 ## Testing
-- Backend: PHPUnit for Laravel testing
-- Frontend: No test framework currently configured
+- Backend: PHPUnit with Laravel testing suite
+- Test configuration: `phpunit.xml`
+- Test location: `tests/` directory

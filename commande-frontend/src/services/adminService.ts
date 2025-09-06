@@ -239,7 +239,7 @@ class AdminService {
     return this.handleResponse<ApiResponse<Product>>(response);
   }
 
-  async createProduct(data: ProductData): Promise<ApiResponse<Product>> {
+  async createProduct(data: ProductFormData): Promise<ApiResponse<Product>> {
     const response = await fetch(`${API_BASE_URL}/admin/products`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -249,7 +249,7 @@ class AdminService {
     return this.handleResponse<ApiResponse<Product>>(response);
   }
 
-  async updateProduct(id: number, data: ProductData): Promise<ApiResponse<Product>> {
+  async updateProduct(id: number, data: ProductFormData): Promise<ApiResponse<Product>> {
     const response = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
       method: 'PUT',
       headers: this.getHeaders(),

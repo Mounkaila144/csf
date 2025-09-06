@@ -23,13 +23,11 @@ export default function ProductForm({
     name: '',
     description: '',
     price: 0,
-    original_price: 0,
     category_id: 0,
     subcategory_id: 0,
-    image: '',
-    status: 'active',
-    is_featured: false,
-    stock_quantity: 0
+    images: [],
+    is_active: true,
+    stock: 0
   });
 
   const [subcategories, setSubcategories] = useState<AdminSubcategory[]>([]);
@@ -50,7 +48,7 @@ export default function ProductForm({
         image: product.image || '',
         status: product.status,
         is_featured: product.is_featured,
-        stock_quantity: product.stock_quantity
+        stock: product.stock
       });
       
       if (product.image) {
@@ -88,8 +86,8 @@ export default function ProductForm({
       newErrors.category_id = 'Veuillez sélectionner une catégorie';
     }
 
-    if (formData.stock_quantity < 0) {
-      newErrors.stock_quantity = 'La quantité en stock ne peut pas être négative';
+    if (formData.stock < 0) {
+      newErrors.stock = 'La quantité en stock ne peut pas être négative';
     }
 
     setErrors(newErrors);
@@ -242,22 +240,22 @@ export default function ProductForm({
 
           {/* Quantité en stock */}
           <div>
-            <label htmlFor="stock_quantity" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-2">
               Quantité en stock *
             </label>
             <input
               type="number"
-              id="stock_quantity"
-              name="stock_quantity"
-              value={formData.stock_quantity}
+              id="stock"
+              name="stock"
+              value={formData.stock}
               onChange={handleChange}
               min="0"
               className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.stock_quantity ? 'border-red-500' : 'border-gray-300'
+                errors.stock ? 'border-red-500' : 'border-gray-300'
               }`}
               disabled={isLoading}
             />
-            {errors.stock_quantity && <p className="mt-1 text-sm text-red-600">{errors.stock_quantity}</p>}
+            {errors.stock && <p className="mt-1 text-sm text-red-600">{errors.stock}</p>}
           </div>
 
           {/* Catégorie */}
