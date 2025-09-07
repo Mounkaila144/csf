@@ -1,7 +1,7 @@
 import { getFullImageUrl } from './adminService';
 import { ProductStatus } from '../types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://https://commandesansfrontiere.com/api';
 
 // Types pour l'API publique
 export interface PublicProduct {
