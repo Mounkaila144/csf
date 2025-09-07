@@ -89,7 +89,7 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Vue d'ensemble de votre boutique en ligne
+            Vue d&apos;ensemble de votre boutique en ligne
           </p>
         </div>
 

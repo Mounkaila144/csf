@@ -103,7 +103,7 @@ export default function ProductForm({
     }
 
     try {
-      let finalFormData = { ...formData };
+      const finalFormData = { ...formData };
       
       // Upload de l'image si nécessaire
       if (imageFile) {
@@ -128,7 +128,7 @@ export default function ProductForm({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    let processedValue: any = value;
+    let processedValue: string | number | boolean = value;
 
     if (type === 'number') {
       processedValue = parseFloat(value) || 0;

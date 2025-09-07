@@ -10,7 +10,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ filters, onFilterChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   
-  const updateFilter = (key: keyof FilterOptions, value: any) => {
+  const updateFilter = (key: keyof FilterOptions, value: string | number | boolean | string[] | undefined) => {
     onFilterChange({ ...filters, [key]: value });
   };
 

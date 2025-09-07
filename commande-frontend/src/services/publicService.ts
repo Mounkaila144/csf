@@ -223,7 +223,7 @@ class PublicService {
   // ==================== UTILITY ====================
   
   // Convertir un produit de l'API vers le format attendu par les composants existants
-  convertToFrontendProduct(apiProduct: PublicProduct): any {
+  convertToFrontendProduct(apiProduct: PublicProduct): Product {
     const status = apiProduct.status || [];
     return {
       id: apiProduct.id.toString(),
@@ -246,7 +246,7 @@ class PublicService {
   }
 
   // Convertir une catégorie de l'API vers le format attendu par les composants existants
-  convertToFrontendCategory(apiCategory: PublicCategory): any {
+  convertToFrontendCategory(apiCategory: PublicCategory): Category {
     return {
       id: apiCategory.id.toString(),
       name: apiCategory.name,

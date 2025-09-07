@@ -128,7 +128,7 @@ export default function CategoryForm({
         {/* Image */}
         <div>
           <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
-            URL de l'image
+            URL de l&apos;image
           </label>
           <input
             type="url"

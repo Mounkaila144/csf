@@ -208,3 +208,5 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
     </div>
   );
 };
+
+export default Home;

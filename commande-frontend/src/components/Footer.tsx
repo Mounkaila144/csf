@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Truck, Shield, CreditCard, RotateCcw, MessageCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Truck, Shield, CreditCard, MessageCircle } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -21,8 +21,8 @@ const Footer: React.FC = () => {
               </div>
             </div>
             <p className="text-gray-300 mb-4">
-              Plus de 5 ans d'expérience en commerce international et transport.
-              Nous nous occupons de vos produits, de l'acquisition à l'acheminement.
+              Plus de 5 ans d&apos;expérience en commerce international et transport.
+              Nous nous occupons de vos produits, de l&apos;acquisition à l&apos;acheminement.
             </p>
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
@@ -76,7 +76,7 @@ const Footer: React.FC = () => {
               <li><a href="#" className="hover:text-white transition-colors">Programme Ambassadeur</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Notre Équipe</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Partenaires Chinois</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Opportunités d'Affaires</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Opportunités d&apos;Affaires</a></li>
             </ul>
           </div>
 

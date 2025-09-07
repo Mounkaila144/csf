@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRequireAdmin } from '../../hooks/useAdminAuth';
 
 interface AdminProtectedRouteProps {
@@ -26,13 +27,13 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
         <div className="text-center">
           <div className="text-red-500 text-6xl mb-4">🚫</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Accès refusé</h1>
-          <p className="text-gray-600 mb-4">Vous n'avez pas les permissions nécessaires pour accéder à cette page.</p>
-          <a
+          <p className="text-gray-600 mb-4">Vous n&apos;avez pas les permissions nécessaires pour accéder à cette page.</p>
+          <Link
             href="/"
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
           >
-            Retour à l'accueil
-          </a>
+            Retour à l&apos;accueil
+          </Link>
         </div>
       </div>
     );

@@ -56,9 +56,10 @@ export default function SubcategoriesModal({ category, isOpen, onClose }: Subcat
       }
       await loadSubcategories();
       resetForm();
-    } catch (error: any) {
-      if (error.response?.data?.errors) {
-        setErrors(error.response.data.errors);
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const errorResponse = (error as { response: { data: { errors: Record<string, string[]> } } }).response;
+        setErrors(errorResponse.data.errors);
       } else {
         setErrors({ general: ['Une erreur est survenue lors de la sauvegarde.'] });
       }
@@ -80,7 +81,7 @@ export default function SubcategoriesModal({ category, isOpen, onClose }: Subcat
   };
 
   const handleDelete = async (id: number, name: string) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer la sous-catégorie "${name}" ?`)) {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer la sous-catégorie &quot;${name}&quot; ?`)) {
       try {
         await adminService.deleteSubcategory(id);
         await loadSubcategories();
@@ -132,7 +133,7 @@ export default function SubcategoriesModal({ category, isOpen, onClose }: Subcat
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
-              Sous-catégories de "{category.name}"
+              Sous-catégories de &quot;{category.name}&quot;
             </h2>
             <p className="text-sm text-gray-500 mt-1">
               Gérez les sous-catégories associées à cette catégorie

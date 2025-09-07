@@ -45,9 +45,10 @@ export default function SubcategoryForm({
 
     try {
       await onSubmit(formData);
-    } catch (error: any) {
-      if (error.response?.data?.errors) {
-        setErrors(error.response.data.errors);
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const errorResponse = (error as { response: { data: { errors: Record<string, string[]> } } }).response;
+        setErrors(errorResponse.data.errors);
       } else {
         setErrors({ general: ['Une erreur est survenue lors de la sauvegarde.'] });
       }
@@ -168,7 +169,7 @@ export default function SubcategoryForm({
         {/* Image */}
         <div>
           <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
-            URL de l'image
+            URL de l&apos;image
           </label>
           <input
             type="url"

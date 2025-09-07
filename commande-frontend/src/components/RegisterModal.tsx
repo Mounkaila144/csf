@@ -324,7 +324,7 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
         <div className="mt-6 text-center text-xs text-gray-500">
           En créant un compte, vous acceptez nos{' '}
           <a href="#" className="text-blue-600 hover:text-blue-500">
-            conditions d'utilisation
+            conditions d&apos;utilisation
           </a>{' '}
           et notre{' '}
           <a href="#" className="text-blue-600 hover:text-blue-500">
