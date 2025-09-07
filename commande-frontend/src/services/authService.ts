@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://https://commandesansfrontiere.com/api';
+const API_BASE_URL = 'https://commandesansfrontiere.com/api';
 
 export interface User {
   id: number;

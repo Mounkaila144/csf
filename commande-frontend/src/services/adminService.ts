@@ -1,7 +1,7 @@
 import { ProductFormData, AdminProduct } from '../types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://https://commandesansfrontiere.com/api';
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://https://commandesansfrontiere.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://commandesansfrontiere.com/api';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://commandesansfrontiere.com';
 
 // Fonction helper pour construire les URLs complètes des images
 export const getFullImageUrl = (imagePath: string): string => {
