@@ -43,7 +43,7 @@ export default function ProductTable({
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'XAF'
     }).format(price);
   };
 

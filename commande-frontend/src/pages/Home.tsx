@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import CategoryMenu from '../components/CategoryMenu';
+import CategoryMenuSimple from '../components/CategoryMenuSimple';
 import Banner from '../components/Banner';
 import Sidebar from '../components/Sidebar';
 import ProductGrid from '../components/ProductGrid';
@@ -162,7 +162,7 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Category Menu */}
-      <CategoryMenu 
+      <CategoryMenuSimple 
         categories={categories}
         onCategorySelect={handleCategorySelect}
         selectedCategory={selectedCategory}
