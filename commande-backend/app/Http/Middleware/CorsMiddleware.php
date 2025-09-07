@@ -19,11 +19,12 @@ class CorsMiddleware
             $response = $next($request);
         }
 
-        $response->headers->set('Access-Control-Allow-Origin', $request->header('Origin') ?: 'https://commandesansfrontiere.com');
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-CSRF-TOKEN');
-        $response->headers->set('Access-Control-Allow-Credentials', 'true');
-        $response->headers->set('Access-Control-Max-Age', '86400');
+        // Désactiver complètement CORS - autoriser tout
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', '*');
+        $response->headers->set('Access-Control-Allow-Headers', '*');
+        $response->headers->set('Access-Control-Allow-Credentials', 'false');
+        $response->headers->set('Access-Control-Max-Age', '0');
 
         return $response;
     }

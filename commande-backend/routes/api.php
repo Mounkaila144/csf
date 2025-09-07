@@ -21,7 +21,7 @@ use App\Http\Controllers\Api\OrderController;
 */
 
 // Authentication routes
-Route::middleware(['cors'])->prefix('auth')->group(function () {
+Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     
@@ -69,8 +69,8 @@ Route::get('products/new/list', [ProductController::class, 'getNewProducts']);
 Route::get('products/on-sale/list', [ProductController::class, 'getOnSaleProducts']);
 Route::get('products/status/{status}', [ProductController::class, 'getProductsByStatus']);
 
-// Admin only routes - use CORS and role middleware
-Route::middleware(['cors', 'role:admin'])->prefix('admin')->group(function () {
+// Admin only routes - CORS désactivé globalement
+Route::middleware(['role:admin'])->prefix('admin')->group(function () {
     // Categories management
     Route::apiResource('categories', CategoryController::class);
     
@@ -84,7 +84,7 @@ Route::middleware(['cors', 'role:admin'])->prefix('admin')->group(function () {
 });
 
 // Upload routes (admin only)
-Route::middleware(['cors', 'role:admin'])->group(function () {
+Route::middleware(['role:admin'])->group(function () {
     Route::post('upload/image', [UploadController::class, 'uploadImage']);
     Route::delete('upload/image', [UploadController::class, 'deleteImage']);
 });
