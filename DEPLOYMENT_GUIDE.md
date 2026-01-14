@@ -2,21 +2,13 @@
 
 Ce guide détaille les étapes pour déployer l'application e-commerce sur le serveur avec Apache et PHP 8.2.
 
-## Informations du Serveur
-- **Chemin du projet**: `/var/www/csf/`
-- **Domaine**: `commandesansfrontiere.com`
-- **PHP Version**: 8.2
-- **Serveur Web**: Apache avec SSL
-
-## 1. Préparation du Backend Laravel
-
 ### Installation et Configuration
 ```bash
 # Aller dans le répertoire backend
-cd /var/www/csf/commande-backend
+cd /var/www/hyperlink/hyperlinkbacken
 
 # Installer les dépendances Composer (production)
-composer install --optimize-autoloader --no-dev
+composer install
 
 # Copier et configurer l'environnement
 cp .env.example .env
@@ -29,14 +21,14 @@ APP_NAME="Commandes Sans Frontière"
 APP_ENV=production
 APP_KEY=base64:VOTRE_CLE_GENEREE
 APP_DEBUG=false
-APP_URL=https://commandesansfrontiere.com
+APP_URL=https://hyperlink.ptrniger.com
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=commande_db
-DB_USERNAME=commande_user
-DB_PASSWORD=VOTRE_MOT_DE_PASSE
+DB_DATABASE=hyperlink_db
+DB_USERNAME=root
+DB_PASSWORD=VOTRE_MOT_DE_PASSE_SECURISE
 
 # JWT Configuration
 JWT_SECRET=VOTRE_JWT_SECRET
@@ -80,7 +72,7 @@ npm run build
 ### Configuration des Variables d'Environnement
 ```bash
 # Aller dans le répertoire frontend
-cd /var/www/csf/commande-frontend
+cd /var/www/hyperlink
 
 # Copier et configurer l'environnement
 cp .env.local.example .env.local
@@ -90,8 +82,8 @@ nano .env.local
 ### Configuration .env.local pour la Production
 ```env
 # Backend API URLs
-NEXT_PUBLIC_BACKEND_URL=https://commandesansfrontiere.com
-NEXT_PUBLIC_API_BASE_URL=https://commandesansfrontiere.com/api
+NEXT_PUBLIC_BACKEND_URL=https://hyperlink.ptrniger.com
+NEXT_PUBLIC_API_BASE_URL=https://hyperlink.ptrniger.com/api
 
 # Environnement
 NODE_ENV=production
@@ -121,17 +113,17 @@ pm2 startup
 ## 3. Configuration Apache
 
 ### Créer le fichier VirtualHost
-Créer le fichier `/etc/apache2/sites-available/commandesansfrontiere.com.conf` :
+Créer le fichier `/etc/apache2/sites-available/hyperlink.ptrniger.com.conf` :
 
 ```apache
 <VirtualHost *:443>
-    ServerName commandesansfrontiere.com
-    DocumentRoot /var/www/csf/commande-backend/public
+    ServerName hyperlink.ptrniger.com
+    DocumentRoot /var/www/hyperlink/hyperlinkbacken/public
 
     # Configuration SSL
     SSLEngine on
-    SSLCertificateFile /etc/letsencrypt/live/commandesansfrontiere.com/fullchain.pem
-    SSLCertificateKeyFile /etc/letsencrypt/live/commandesansfrontiere.com/privkey.pem
+    SSLCertificateFile /etc/letsencrypt/live/hyperlink.ptrniger.com/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/hyperlink.ptrniger.com/privkey.pem
     Include /etc/letsencrypt/options-ssl-apache.conf
 
     # Configuration PHP 8.2
@@ -140,7 +132,7 @@ Créer le fichier `/etc/apache2/sites-available/commandesansfrontiere.com.conf` 
     </FilesMatch>
 
     # Configuration du répertoire Laravel
-    <Directory /var/www/csf/commande-backend/public>
+    <Directory /var/www/hyperlink/hyperlinkbacken/public>
         Options -Indexes +FollowSymLinks
         AllowOverride All
         Require all granted
@@ -163,7 +155,7 @@ Créer le fichier `/etc/apache2/sites-available/commandesansfrontiere.com.conf` 
     </Directory>
 
     # Sécurité - Bloquer l'accès aux fichiers sensibles
-    <Directory /var/www/csf/commande-backend>
+    <Directory /var/www/hyperlink/hyperlinkbacken>
         <Files ".env">
             Require all denied
         </Files>
@@ -179,7 +171,7 @@ Créer le fichier `/etc/apache2/sites-available/commandesansfrontiere.com.conf` 
     </Directory>
 
     # Bloquer l'accès aux dossiers Laravel sensibles
-    <DirectoryMatch "^/var/www/csf/commande-backend/(app|bootstrap|config|database|resources|routes|tests|vendor)">
+    <DirectoryMatch "^/var/www/hyperlink/hyperlinkbacken/(app|bootstrap|config|database|resources|routes|tests|vendor)">
         Require all denied
     </DirectoryMatch>
 
@@ -221,14 +213,14 @@ Créer le fichier `/etc/apache2/sites-available/commandesansfrontiere.com.conf` 
 
     # Logs spécifiques
     LogLevel info
-    ErrorLog   ${APACHE_LOG_DIR}/commandesansfrontiere-error.log
-    CustomLog  ${APACHE_LOG_DIR}/commandesansfrontiere-access.log combined
+    ErrorLog   ${APACHE_LOG_DIR}/hyperlink.ptrniger-error.log
+    CustomLog  ${APACHE_LOG_DIR}/hyperlink.ptrniger-access.log combined
 </VirtualHost>
 
 # Redirection HTTP vers HTTPS
 <VirtualHost *:80>
-    ServerName commandesansfrontiere.com
-    DocumentRoot /var/www/csf/commande-backend/public
+    ServerName hyperlink.ptrniger.com
+    DocumentRoot /var/www/hyperlink/hyperlinkbacken/public
 
     # Redirection permanente vers HTTPS
     RewriteEngine On
@@ -236,8 +228,8 @@ Créer le fichier `/etc/apache2/sites-available/commandesansfrontiere.com.conf` 
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
     # Logs pour le HTTP aussi
-    ErrorLog   ${APACHE_LOG_DIR}/commandesansfrontiere-http-error.log
-    CustomLog  ${APACHE_LOG_DIR}/commandesansfrontiere-http-access.log combined
+    ErrorLog   ${APACHE_LOG_DIR}/hyperlink.ptrniger-http-error.log
+    CustomLog  ${APACHE_LOG_DIR}/hyperlink.ptrniger-http-access.log combined
 </VirtualHost>
 ```
 
@@ -253,7 +245,7 @@ a2enmod deflate
 a2enmod expires
 
 # Activer le site
-a2ensite commandesansfrontiere.com.conf
+a2ensite hyperlink.ptrniger.com.conf
 
 # Tester la configuration Apache
 apache2ctl configtest
@@ -266,92 +258,53 @@ systemctl reload apache2
 
 ```bash
 # Configurer les permissions pour Laravel
-sudo chown -R www-data:www-data /var/www/csf/commande-backend
-sudo chmod -R 755 /var/www/csf/commande-backend
-sudo chmod -R 775 /var/www/csf/commande-backend/storage
-sudo chmod -R 775 /var/www/csf/commande-backend/bootstrap/cache
+sudo chown -R www-data:www-data /var/www/hyperlink/hyperlinkbacken
+sudo chmod -R 755 /var/www/hyperlink/hyperlinkbacken
+sudo chmod -R 775 /var/www/hyperlink/hyperlinkbacken/storage
+sudo chmod -R 775 /var/www/hyperlink/hyperlinkbacken/bootstrap/cache
 
 # Sécuriser le fichier .env
-sudo chmod 600 /var/www/csf/commande-backend/.env
+sudo chmod 600 /var/www/hyperlink/hyperlinkbacken/.env
 
 # Configurer les permissions pour Next.js
-sudo chown -R www-data:www-data /var/www/csf/commande-frontend
-sudo chmod -R 755 /var/www/csf/commande-frontend
+sudo chown -R www-data:www-data /var/www/hyperlink
+sudo chmod -R 755 /var/www/hyperlink
 ```
 
 ## 5. Configuration SSL avec Let's Encrypt
 
 ```bash
-# Installer Certbot (si pas déjà installé)
-sudo apt update
-sudo apt install certbot python3-certbot-apache
-
 # Obtenir le certificat SSL pour le domaine
-sudo certbot --apache -d commandesansfrontiere.com
-
-# Vérifier le renouvellement automatique
-sudo certbot renew --dry-run
-
-# Configurer le renouvellement automatique (crontab)
-sudo crontab -e
-# Ajouter cette ligne :
-# 0 12 * * * /usr/bin/certbot renew --quiet
-```
-
-## 6. Configuration de la Base de Données
-
-```bash
-# Se connecter à MySQL
-sudo mysql -u root -p
-
-# Créer la base de données et l'utilisateur
-CREATE DATABASE commande_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'commande_user'@'localhost' IDENTIFIED BY 'VOTRE_MOT_DE_PASSE_SECURISE';
-GRANT ALL PRIVILEGES ON commande_db.* TO 'commande_user'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-
-# Exécuter les migrations
-cd /var/www/csf/commande-backend
-/usr/bin/php8.2 artisan migrate --force
-
-# Optionnel : Exécuter les seeders
-/usr/bin/php8.2 artisan db:seed --force
+sudo certbot --apache -d hyperlink.ptrniger.com
 ```
 
 ## 7. Vérifications Post-Déploiement
 
 ### Vérifier les Services
 ```bash
-# Vérifier Apache
-sudo systemctl status apache2
-
-# Vérifier PHP-FPM 8.2
-sudo systemctl status php8.2-fpm
-
 # Vérifier PM2
 pm2 status
 
 # Vérifier les logs
-sudo tail -f /var/log/apache2/commandesansfrontiere-error.log
+sudo tail -f /var/log/apache2/hyperlink.ptrniger-error.log
 pm2 logs commande-frontend --lines 20
 ```
 
 ### Vérifier les Variables d'Environnement
 ```bash
 # Vérifier que les variables sont correctes
-cd /var/www/csf/commande-frontend
+cd /var/www/hyperlink
 cat .env.local
 
 # Les URLs doivent pointer vers le domaine de production :
-# NEXT_PUBLIC_BACKEND_URL=https://commandesansfrontiere.com
-# NEXT_PUBLIC_API_BASE_URL=https://commandesansfrontiere.com/api
+# NEXT_PUBLIC_BACKEND_URL=https://hyperlink.ptrniger.com
+# NEXT_PUBLIC_API_BASE_URL=https://hyperlink.ptrniger.com/api
 ```
 
 ### Tests Fonctionnels
-1. **Frontend** : Accéder à `https://commandesansfrontiere.com`
-2. **API Backend** : Tester `https://commandesansfrontiere.com/api/health`
-3. **Storage** : Vérifier l'accès aux images `https://commandesansfrontiere.com/storage/`
+1. **Frontend** : Accéder à `https://hyperlink.ptrniger.com`
+2. **API Backend** : Tester `https://hyperlink.ptrniger.com/api/health`
+3. **Storage** : Vérifier l'accès aux images `https://hyperlink.ptrniger.com/storage/`
 
 ## 8. Maintenance et Mises à Jour
 
@@ -375,7 +328,7 @@ cat .env.local
 ### Commandes de Maintenance Next.js
 ```bash
 # Redéployer le frontend
-cd /var/www/csf/commande-frontend
+cd /var/www/hyperlink
 npm run build
 pm2 restart commande-frontend
 
@@ -396,13 +349,13 @@ pm2 status
 
 DATE=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="/var/backups/commande"
-PROJECT_DIR="/var/www/csf"
+PROJECT_DIR="/var/www/hyperlink"
 
 # Créer le répertoire de sauvegarde
 mkdir -p $BACKUP_DIR
 
 # Sauvegarder la base de données
-mysqldump -u commande_user -p'VOTRE_MOT_DE_PASSE' commande_db > $BACKUP_DIR/commande_db_$DATE.sql
+mysqldump -u root -p hyperlink_db > $BACKUP_DIR/commande_db_$DATE.sql
 
 # Sauvegarder les fichiers
 tar -czf $BACKUP_DIR/commande_files_$DATE.tar.gz -C $PROJECT_DIR .
@@ -424,15 +377,15 @@ sudo crontab -e
 ## 10. Surveillance et Logs
 
 ### Fichiers de Logs Importants
-- Apache : `/var/log/apache2/commandesansfrontiere-error.log`
-- Laravel : `/var/www/csf/commande-backend/storage/logs/laravel.log`
+- Apache : `/var/log/apache2/hyperlink.ptrniger-error.log`
+- Laravel : `/var/www/hyperlink/hyperlinkbacken/storage/logs/laravel.log`
 - PM2 : `pm2 logs commande-frontend`
 
 ### Commandes de Surveillance
 ```bash
 # Surveiller les logs en temps réel
-sudo tail -f /var/log/apache2/commandesansfrontiere-error.log
-sudo tail -f /var/www/csf/commande-backend/storage/logs/laravel.log
+sudo tail -f /var/log/apache2/hyperlink.ptrniger-error.log
+sudo tail -f /var/www/hyperlink/hyperlinkbacken/storage/logs/laravel.log
 pm2 logs commande-frontend --lines 50
 
 # Vérifier l'espace disque

@@ -17,7 +17,6 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
-            'role' => 'sometimes|in:admin,client'
         ]);
 
         if ($validator->fails()) {
@@ -28,11 +27,13 @@ class AuthController extends Controller
             ], 400);
         }
 
+        // SÉCURITÉ: Forcer tous les nouveaux utilisateurs à être "client"
+        // Seul un admin existant peut créer un compte admin
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role ?? 'client'
+            'role' => 'client'
         ]);
 
         $token = JWTAuth::fromUser($user);

@@ -196,23 +196,6 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
             )}
           </div>
 
-          {/* Role Field */}
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-              Type de compte
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            >
-              <option value="client">Client</option>
-              <option value="admin">Administrateur</option>
-            </select>
-          </div>
-
           {/* Password Field */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">

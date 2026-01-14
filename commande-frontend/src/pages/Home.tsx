@@ -46,8 +46,9 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
       setError(null);
 
       // Charger les produits et catégories en parallèle
+      // OPTIMISATION: Limiter à 20 produits pour réduire la consommation mémoire
       const [productsResponse, categoriesResponse] = await Promise.all([
-        publicService.getProducts(1, 50), // Charger plus de produits pour la page d'accueil
+        publicService.getProducts(1, 20),
         publicService.getActiveCategories()
       ]);
 
@@ -63,9 +64,9 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
 
       setProducts(convertedProducts);
       setCategories(convertedCategories);
-      
-      // Définir les produits vedettes (pour l'instant, on prend les premiers)
-      setFeaturedProducts(convertedProducts.slice(0, 8));
+
+      // Définir les produits vedettes (limiter à 6 pour optimiser)
+      setFeaturedProducts(convertedProducts.slice(0, 6));
 
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
@@ -76,26 +77,20 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
   };
 
   const handleCategorySelect = (categoryId: string) => {
-    console.log('Category selected:', categoryId);
-    console.log('Available categories:', categories);
-    console.log('Available products:', products);
-    
     setSelectedCategory(categoryId);
-    
+
     // Si c'est une sous-catégorie (format: "categoryId-subcategoryId")
     if (categoryId.includes('-')) {
       const [catId, subId] = categoryId.split('-');
-      console.log('Subcategory filter - catId:', catId, 'subId:', subId);
-      setFilters(prev => ({ 
-        ...prev, 
+      setFilters(prev => ({
+        ...prev,
         categories: [catId],
         subcategoryId: parseInt(subId)
       }));
     } else {
       // Si c'est une catégorie principale
-      console.log('Category filter - catId:', categoryId);
-      setFilters(prev => ({ 
-        ...prev, 
+      setFilters(prev => ({
+        ...prev,
         categories: [categoryId],
         subcategoryId: undefined
       }));
@@ -108,8 +103,6 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
 
   // Filter products based on search and category
   const filteredProducts = products.filter(product => {
-    console.log('Filtering product:', product.name, 'categoryId:', product.categoryId, 'subcategoryId:', product.subcategoryId);
-    
     if (searchQuery) {
       return product.name.toLowerCase().includes(searchQuery.toLowerCase());
     }
@@ -117,18 +110,14 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
       if (selectedCategory.includes('-')) {
         // Filtrage par sous-catégorie
         const [catId, subId] = selectedCategory.split('-');
-        console.log('Subcategory filter - looking for catId:', catId, 'subId:', subId);
         return product.categoryId === catId && product.subcategoryId === subId;
       } else {
         // Filtrage par catégorie
-        console.log('Category filter - looking for catId:', selectedCategory);
         return product.categoryId === selectedCategory;
       }
     }
     return true;
   });
-
-  console.log('Filtered products count:', filteredProducts.length);
 
   if (loading) {
     return (

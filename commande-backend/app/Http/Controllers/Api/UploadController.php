@@ -29,9 +29,19 @@ class UploadController extends Controller
 
         try {
             $image = $request->file('image');
-            
+
+            // SÉCURITÉ: Déterminer l'extension depuis le MIME type (plus sécurisé)
+            $mimeToExtension = [
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/gif' => 'gif',
+                'image/webp' => 'webp'
+            ];
+
+            $extension = $mimeToExtension[$image->getMimeType()] ?? 'jpg';
+
             // Generate unique filename
-            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            $filename = time() . '_' . Str::random(10) . '.' . $extension;
             
             // Store in public/storage/images directory
             $path = $image->storeAs('images', $filename, 'public');
@@ -76,11 +86,23 @@ class UploadController extends Controller
 
         try {
             $path = $request->input('path');
-            
+
+            // SÉCURITÉ: Valider le chemin pour éviter path traversal
+            // Le chemin doit commencer par "images/" et ne doit pas contenir ".."
+            if (!str_starts_with($path, 'images/') || str_contains($path, '..')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid file path'
+                ], 400);
+            }
+
+            // Normaliser le chemin pour éviter les tentatives d'évasion
+            $normalizedPath = str_replace(['../', './', '\\'], '', $path);
+
             // Check if file exists and delete it
-            if (Storage::disk('public')->exists($path)) {
-                Storage::disk('public')->delete($path);
-                
+            if (Storage::disk('public')->exists($normalizedPath)) {
+                Storage::disk('public')->delete($normalizedPath);
+
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Image deleted successfully'
@@ -91,7 +113,7 @@ class UploadController extends Controller
                     'message' => 'Image not found'
                 ], 404);
             }
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',

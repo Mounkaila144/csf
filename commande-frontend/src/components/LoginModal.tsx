@@ -240,15 +240,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             </button>
           </p>
         </div>
-
-        {/* Demo credentials */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h4 className="text-sm font-medium text-gray-900 mb-2">Comptes de démonstration :</h4>
-          <div className="text-xs text-gray-600 space-y-1">
-            <div><strong>Admin :</strong> admin@example.com / password</div>
-            <div><strong>Client :</strong> client@example.com / password</div>
-          </div>
-        </div>
       </div>
     </Modal>
   );

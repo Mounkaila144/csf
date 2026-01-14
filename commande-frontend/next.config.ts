@@ -3,12 +3,12 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   typescript: {
-    // Ignorer les erreurs de type pendant le build
-    ignoreBuildErrors: true,
+    // SÉCURITÉ: Activer les vérifications TypeScript pour détecter les erreurs
+    ignoreBuildErrors: false,
   },
   eslint: {
-    // Ignorer les warnings ESLint pendant le build
-    ignoreDuringBuilds: true,
+    // SÉCURITÉ: Activer ESLint pour détecter les problèmes de code
+    ignoreDuringBuilds: false,
   },
   webpack: (config) => {
     config.resolve.alias = {
@@ -17,6 +17,8 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  // OPTIMISATION: Mode standalone pour réduire la taille du bundle
+  output: 'standalone',
 };
 
 export default nextConfig;
