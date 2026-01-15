@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\SubcategoryController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\CurrencyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +70,13 @@ Route::get('products/new/list', [ProductController::class, 'getNewProducts']);
 Route::get('products/on-sale/list', [ProductController::class, 'getOnSaleProducts']);
 Route::get('products/status/{status}', [ProductController::class, 'getProductsByStatus']);
 
+// Currency conversion routes (public)
+Route::prefix('currency')->group(function () {
+    Route::get('rate', [CurrencyController::class, 'getExchangeRate']);
+    Route::post('convert', [CurrencyController::class, 'convert']);
+    Route::post('price-info', [CurrencyController::class, 'getPriceInfo']);
+});
+
 // Admin only routes - CORS désactivé globalement
 Route::middleware(['role:admin'])->prefix('admin')->group(function () {
     // Categories management
@@ -86,6 +94,7 @@ Route::middleware(['role:admin'])->prefix('admin')->group(function () {
 // Upload routes (admin only)
 Route::middleware(['role:admin'])->group(function () {
     Route::post('upload/image', [UploadController::class, 'uploadImage']);
+    Route::post('upload/images', [UploadController::class, 'uploadMultipleImages']);
     Route::delete('upload/image', [UploadController::class, 'deleteImage']);
 });
 

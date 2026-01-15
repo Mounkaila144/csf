@@ -1,7 +1,7 @@
 import { getFullImageUrl } from './adminService';
-import { ProductStatus } from '../types';
+import { ProductStatus, Product, Category } from '../types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://commandesansfrontiere.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Types pour l'API publique
 export interface PublicProduct {
@@ -225,12 +225,17 @@ class PublicService {
   // Convertir un produit de l'API vers le format attendu par les composants existants
   convertToFrontendProduct(apiProduct: PublicProduct): Product {
     const status = apiProduct.status || [];
+    const fullImageUrls = apiProduct.images && apiProduct.images.length > 0
+      ? apiProduct.images.map(img => getFullImageUrl(img))
+      : [];
+
     return {
       id: apiProduct.id.toString(),
       name: apiProduct.name,
       price: parseFloat(apiProduct.price.toString()),
       originalPrice: undefined, // Pas encore implémenté dans l'API
-      image: apiProduct.images && apiProduct.images.length > 0 ? getFullImageUrl(apiProduct.images[0]) : '/placeholder-product.jpg',
+      image: fullImageUrls.length > 0 ? fullImageUrls[0] : '/placeholder-product.jpg',
+      images: fullImageUrls.length > 0 ? fullImageUrls : undefined,
       rating: 4.5, // Valeur par défaut, à implémenter dans l'API
       reviews: 0, // Valeur par défaut, à implémenter dans l'API
       category: apiProduct.category?.name || 'Non catégorisé',

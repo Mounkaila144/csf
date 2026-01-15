@@ -16,7 +16,7 @@ class Kernel extends HttpKernel
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
         \App\Http\Middleware\TrustProxies::class,
-        // \App\Http\Middleware\CorsMiddleware::class, // Désactivé - utilisation de config/cors.php à la place
+        \Illuminate\Http\Middleware\HandleCors::class, // CORS Laravel natif (utilise config/cors.php)
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,

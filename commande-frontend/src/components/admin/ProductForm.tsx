@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { AdminProduct, ProductFormData, AdminCategory, AdminSubcategory, ProductStatus } from '../../types';
 import { adminService, getFullImageUrl } from '../../services/adminService';
 import { PRODUCT_STATUSES } from '../../constants/productStatus';
+import ImageUpload from './ImageUpload';
 
 interface ProductFormProps {
   product?: AdminProduct;
@@ -34,9 +35,7 @@ export default function ProductForm({
 
   const [subcategories, setSubcategories] = useState<AdminSubcategory[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]); // Fichiers en attente d'upload
 
   useEffect(() => {
     if (product) {
@@ -46,16 +45,12 @@ export default function ProductForm({
         price: product.price,
         category_id: product.category_id,
         subcategory_id: product.subcategory_id || 0,
-        images: product.images || [],
+        images: product.images?.map(img => getFullImageUrl(img)) || [],
         is_active: product.is_active,
         stock: product.stock,
         status: product.status || []
       });
-      
-      if (product.images && product.images.length > 0) {
-        setImagePreview(getFullImageUrl(product.images[0]));
-      }
-      
+
       // Charger les sous-catégories si une catégorie est sélectionnée
       if (product.category_id) {
         loadSubcategories(product.category_id);
@@ -97,26 +92,23 @@ export default function ProductForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     try {
-      const finalFormData = { ...formData };
-      
-      // Upload de l'image si nécessaire
-      if (imageFile) {
-        setUploadingImage(true);
+      let finalFormData = { ...formData };
+
+      // Si on a des fichiers en attente (mode création avec preview)
+      if (pendingFiles.length > 0) {
         try {
-          const uploadResponse = await adminService.uploadImage(imageFile);
-          finalFormData.images = [uploadResponse.data.url];
+          const uploadedUrls = await adminService.uploadMultipleImages(pendingFiles);
+          finalFormData.images = uploadedUrls;
         } catch (error) {
-          console.error('Erreur lors de l\'upload de l\'image:', error);
-          setErrors({ image: 'Erreur lors de l\'upload de l\'image' });
+          console.error('Erreur lors de l\'upload des images:', error);
+          setErrors({ image: 'Erreur lors de l\'upload des images' });
           return;
-        } finally {
-          setUploadingImage(false);
         }
       }
 
@@ -163,25 +155,39 @@ export default function ProductForm({
     const newStatus = currentStatus.includes(statusValue)
       ? currentStatus.filter(s => s !== statusValue)
       : [...currentStatus, statusValue];
-    
+
     setFormData(prev => ({
       ...prev,
       status: newStatus
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      
-      // Créer un aperçu
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleImagesChange = (images: string[], files?: File[]) => {
+    setFormData(prev => ({
+      ...prev,
+      images
+    }));
+
+    // Si on a des fichiers (mode preview), les stocker pour upload ultérieur
+    if (files && files.length > 0) {
+      setPendingFiles(prev => [...prev, ...files]);
     }
+  };
+
+  const handleImagesUpload = async (files: File[]): Promise<string[]> => {
+    try {
+      // Upload immédiat uniquement en mode édition
+      const urls = await adminService.uploadMultipleImages(files);
+      return urls;
+    } catch (error) {
+      console.error('Erreur lors de l\'upload des images:', error);
+      throw error;
+    }
+  };
+
+  const handleFilesReady = (files: File[]) => {
+    // Stocker les fichiers compressés pour upload ultérieur
+    setPendingFiles(prev => [...prev, ...files]);
   };
 
   return (
@@ -319,28 +325,19 @@ export default function ProductForm({
           />
         </div>
 
-        {/* Image */}
+        {/* Images */}
         <div>
-          <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
-            Image du produit
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Images du produit
           </label>
-          <input
-            type="file"
-            id="image"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <ImageUpload
+            images={formData.images || []}
+            onImagesChange={handleImagesChange}
+            onUpload={product ? handleImagesUpload : undefined}
+            onFilesReady={handleFilesReady}
+            maxImages={10}
             disabled={isLoading}
           />
-          {imagePreview && (
-            <div className="mt-2">
-              <img
-                src={imagePreview}
-                alt="Aperçu"
-                className="w-32 h-32 object-cover rounded-md border"
-              />
-            </div>
-          )}
           {errors.image && <p className="mt-1 text-sm text-red-600">{errors.image}</p>}
         </div>
 
@@ -394,19 +391,19 @@ export default function ProductForm({
             type="button"
             onClick={onCancel}
             className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-            disabled={isLoading || uploadingImage}
+            disabled={isLoading}
           >
             Annuler
           </button>
           <button
             type="submit"
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading || uploadingImage}
+            disabled={isLoading}
           >
-            {isLoading || uploadingImage ? (
+            {isLoading ? (
               <div className="flex items-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {uploadingImage ? 'Upload en cours...' : 'Enregistrement...'}
+                Enregistrement...
               </div>
             ) : (
               product ? 'Modifier' : 'Créer'

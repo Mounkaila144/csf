@@ -14,7 +14,8 @@ export interface Product {
   name: string;
   price: number;
   originalPrice?: number;
-  image: string;
+  image: string; // Image principale (pour compatibilité)
+  images?: string[]; // Toutes les images (optionnel)
   rating: number;
   reviews: number;
   category: string;

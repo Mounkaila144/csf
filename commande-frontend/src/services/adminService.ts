@@ -1,7 +1,7 @@
 import { ProductFormData, AdminProduct } from '../types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://commandesansfrontiere.com/api';
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://commandesansfrontiere.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ;
 
 // Fonction helper pour construire les URLs complètes des images
 export const getFullImageUrl = (imagePath: string): string => {
@@ -262,7 +262,7 @@ class AdminService {
   async uploadImage(file: File): Promise<ApiResponse<{ url: string }>> {
     const formData = new FormData();
     formData.append('image', file);
-    
+
     const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/upload/image`, {
       method: 'POST',
@@ -271,8 +271,39 @@ class AdminService {
       },
       body: formData,
     });
-    
+
     return this.handleResponse<ApiResponse<{ url: string }>>(response);
+  }
+
+  async uploadMultipleImages(files: File[]): Promise<string[]> {
+    const formData = new FormData();
+
+    // Ajouter tous les fichiers au FormData
+    files.forEach((file, index) => {
+      formData.append(`images[${index}]`, file);
+    });
+
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/upload/images`, {
+      method: 'POST',
+      headers: {
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    const result = await this.handleResponse<ApiResponse<{ urls: string[] }>>(response);
+    return result.data.urls;
+  }
+
+  async deleteImage(path: string): Promise<ApiResponse<null>> {
+    const response = await fetch(`${API_BASE_URL}/upload/image`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ path }),
+    });
+
+    return this.handleResponse<ApiResponse<null>>(response);
   }
 }
 

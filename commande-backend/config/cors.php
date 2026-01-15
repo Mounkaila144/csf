@@ -22,7 +22,8 @@ return [
     'allowed_origins' => [
         'https://hyperlink.ptrniger.com',
         'https://www.hyperlink.ptrniger.com',
-        'http://localhost:3000', // Pour le développement local
+        'http://localhost:3000', // Pour le développement local Next.js
+        'http://localhost:5173', // Pour le développement local Vite
         'https://commandesansfrontiere.com',
     ],
 

@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Star, Heart, ShoppingCart, Truck } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../contexts/CartContext';
+import CurrencyDisplay from './CurrencyDisplay';
+import ImageGallery from './ImageGallery';
+import ProductModal from './ProductModal';
 
 interface ProductCardProps {
   product: Product;
@@ -9,12 +12,13 @@ interface ProductCardProps {
   isFavorite?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ 
-  product, 
-  onToggleFavorite, 
-  isFavorite = false 
+const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  onToggleFavorite,
+  isFavorite = false
 }) => {
   const { addItem } = useCart();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleAddToCart = () => {
     addItem({
@@ -24,20 +28,27 @@ const ProductCard: React.FC<ProductCardProps> = ({
       image: product.image,
     });
   };
-  const discountPercentage = product.originalPrice 
+  const discountPercentage = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
+  const handleCardClick = () => {
+    setIsModalOpen(true);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group">
+    <>
+      <div
+        onClick={handleCardClick}
+        className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group cursor-pointer"
+      >
       {/* Image container */}
       <div className="relative overflow-hidden">
-        <img
-          src={product.image}
+        <ImageGallery
+          images={product.images && product.images.length > 0 ? product.images : [product.image]}
           alt={product.name}
-          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        
+
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {product.isNew && (
@@ -59,7 +70,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Favorite button */}
         <button
-          onClick={() => onToggleFavorite(product.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorite(product.id);
+          }}
           className="absolute top-2 right-2 p-2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full transition-all"
         >
           <Heart
@@ -104,22 +118,32 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         {/* Price */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-custom-blue">
-              {product.price.toLocaleString('fr-FR')} CFA
-            </span>
-            {product.originalPrice && (
-              <span className="text-sm text-gray-500 line-through">
-                {product.originalPrice.toLocaleString('fr-FR')} CFA
-              </span>
-            )}
-          </div>
+        <div className="mb-4">
+          <CurrencyDisplay
+            priceRMB={product.price}
+            showBothCurrencies={true}
+            primaryCurrency="XOF"
+            size="md"
+          />
+          {product.originalPrice && (
+            <div className="mt-1">
+              <CurrencyDisplay
+                priceRMB={product.originalPrice}
+                showBothCurrencies={false}
+                primaryCurrency="XOF"
+                size="sm"
+                className="line-through text-gray-400"
+              />
+            </div>
+          )}
         </div>
 
         {/* Add to cart button */}
         <button
-          onClick={handleAddToCart}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddToCart();
+          }}
           className="w-full bg-custom-blue hover:bg-custom-blue-hover text-white py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 group-hover:bg-custom-blue-hover"
         >
           <ShoppingCart size={18} />
@@ -127,6 +151,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </button>
       </div>
     </div>
+
+      {/* Modal de détails du produit */}
+      <ProductModal
+        product={product}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onToggleFavorite={onToggleFavorite}
+        isFavorite={isFavorite}
+      />
+    </>
   );
 };
 

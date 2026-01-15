@@ -4,12 +4,51 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Services\CurrencyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
+    protected $currencyService;
+
+    public function __construct(CurrencyService $currencyService)
+    {
+        $this->currencyService = $currencyService;
+    }
+
+    /**
+     * Enrichir un produit avec les informations de prix multi-devises
+     */
+    private function enrichProductWithCurrency($product)
+    {
+        if (is_array($product)) {
+            $product = (object) $product;
+        }
+
+        $priceInfo = $this->currencyService->getPriceInfo($product->price);
+
+        $enriched = $product->toArray();
+        $enriched['price_info'] = $priceInfo;
+
+        // Garder le prix original pour la compatibilité
+        $enriched['price_rmb'] = $product->price;
+        $enriched['price_xof'] = $priceInfo['xof']['amount'];
+
+        return $enriched;
+    }
+
+    /**
+     * Enrichir une collection de produits
+     */
+    private function enrichProductsWithCurrency($products)
+    {
+        return array_map(function($product) {
+            return $this->enrichProductWithCurrency($product);
+        }, $products);
+    }
+
     public function index(Request $request)
     {
         $query = Product::with(['category', 'subcategory']);
@@ -67,10 +106,13 @@ class ProductController extends Controller
 
         $products = $query->paginate($request->get('per_page', 15));
 
+        // Enrichir les produits avec les informations de devise
+        $enrichedProducts = $this->enrichProductsWithCurrency($products->items());
+
         return response()->json([
             'status' => 'success',
             'message' => 'Products retrieved successfully',
-            'data' => $products->items(),
+            'data' => $enrichedProducts,
             'meta' => [
                 'current_page' => $products->currentPage(),
                 'last_page' => $products->lastPage(),
@@ -78,7 +120,8 @@ class ProductController extends Controller
                 'total' => $products->total(),
                 'from' => $products->firstItem(),
                 'to' => $products->lastItem()
-            ]
+            ],
+            'exchange_rate' => $this->currencyService->getExchangeRate()
         ]);
     }
 
