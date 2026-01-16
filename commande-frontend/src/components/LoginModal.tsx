@@ -67,10 +67,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     try {
       await login(formData);
       onClose();
-      // Si l'utilisateur est admin après connexion, rediriger vers /admin
+      // Rediriger selon le rôle de l'utilisateur
       const u = authService.getUser();
       if (u?.role === 'admin') {
         router.replace('/admin');
+      } else if (u?.role === 'vendor') {
+        router.replace('/vendor/dashboard');
       }
       // Reset form
       setFormData({ email: '', password: '' });

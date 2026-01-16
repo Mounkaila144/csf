@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ShoppingCart, User, Globe, Heart, MessageCircle, Menu, X, LogOut, UserCheck } from 'lucide-react';
+import { Search, ShoppingCart, User, Heart, MessageCircle, Menu, X, LogOut, UserCheck, Package } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import OrdersModal from './OrdersModal';
 
 interface HeaderProps {
   cartItemCount: number;
@@ -12,11 +13,10 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, onShowRegister, onOpenCart }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [currency, setCurrency] = useState('CFA');
-  const [language, setLanguage] = useState('FR');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showOrdersModal, setShowOrdersModal] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   const { user, isAuthenticated, logout } = useAuth();
@@ -65,6 +65,7 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
   };
 
   return (
+    <>
     <header className={`sticky top-0 z-50 transition-all duration-300 ${
       isScrolled
         ? 'bg-white/95 backdrop-blur-md shadow-xl border-b border-gray-200/50'
@@ -146,37 +147,6 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
 
           {/* Right icons */}
           <div className="flex items-center gap-4">
-            {/* Language & Currency */}
-            <div className="hidden md:flex items-center gap-2">
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 focus:outline-none focus:scale-105 ${
-                  isScrolled
-                    ? 'bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200 focus:border-blue-500'
-                    : 'bg-white/10 border border-white/20 text-white hover:bg-white/20 focus:border-blue-300 backdrop-blur-sm'
-                }`}
-              >
-                <option value="FR" className="text-gray-800">🇳🇪 FR</option>
-                <option value="EN" className="text-gray-800">🇺🇸 EN</option>
-                <option value="DE" className="text-gray-800">🇩🇪 DE</option>
-              </select>
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className={`px-3 py-2 text-sm rounded-lg transition-all duration-300 focus:outline-none focus:scale-105 ${
-                  isScrolled
-                    ? 'bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200 focus:border-blue-500'
-                    : 'bg-white/10 border border-white/20 text-white hover:bg-white/20 focus:border-blue-300 backdrop-blur-sm'
-                }`}
-              >
-                <option value="CFA" className="text-gray-800">CFA F</option>
-                <option value="EUR" className="text-gray-800">EUR €</option>
-                <option value="USD" className="text-gray-800">USD $</option>
-                <option value="GBP" className="text-gray-800">GBP £</option>
-              </select>
-            </div>
-
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -220,6 +190,25 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
                     : 'text-white group-hover:text-red-400'
                 }`} />
               </button>
+
+              {/* Orders Button - Only for authenticated users */}
+              {mounted && isAuthenticated && (
+                <button
+                  onClick={() => setShowOrdersModal(true)}
+                  className={`p-3 rounded-xl transition-all duration-300 group hover:scale-110 ${
+                    isScrolled
+                      ? 'hover:bg-purple-50 hover:shadow-lg'
+                      : 'hover:bg-white/10'
+                  }`}
+                  title="Mes commandes"
+                >
+                  <Package size={22} className={`transition-colors duration-300 ${
+                    isScrolled
+                      ? 'text-gray-600 group-hover:text-purple-600'
+                      : 'text-white group-hover:text-purple-300'
+                  }`} />
+                </button>
+              )}
 
               {/* User Menu */}
               <div className="relative" data-user-menu="true">
@@ -283,10 +272,13 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
                             Mon profil
                           </button>
                           <button
-                            onClick={() => setShowUserMenu(false)}
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              setShowOrdersModal(true);
+                            }}
                             className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"
                           >
-                            <ShoppingCart className="mr-3 h-4 w-4" />
+                            <Package className="mr-3 h-4 w-4" />
                             Mes commandes
                           </button>
                           <button
@@ -384,37 +376,6 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
         isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
       } ${isScrolled ? 'bg-white border-t border-gray-200' : 'bg-blue-800/95 backdrop-blur-sm'}`}>
         <div className="px-4 py-4 space-y-4">
-          {/* Mobile selectors */}
-          <div className="flex gap-2">
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className={`flex-1 px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
-                isScrolled
-                  ? 'bg-gray-100 border border-gray-300 text-gray-700'
-                  : 'bg-white/10 border border-white/20 text-white backdrop-blur-sm'
-              }`}
-            >
-              <option value="FR" className="text-gray-800">🇳🇪 FR</option>
-              <option value="EN" className="text-gray-800">🇺🇸 EN</option>
-              <option value="DE" className="text-gray-800">🇩🇪 DE</option>
-            </select>
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              className={`flex-1 px-3 py-2 text-sm rounded-lg transition-all duration-300 ${
-                isScrolled
-                  ? 'bg-gray-100 border border-gray-300 text-gray-700'
-                  : 'bg-white/10 border border-white/20 text-white backdrop-blur-sm'
-              }`}
-            >
-              <option value="CFA" className="text-gray-800">CFA F</option>
-              <option value="EUR" className="text-gray-800">EUR €</option>
-              <option value="USD" className="text-gray-800">USD $</option>
-              <option value="GBP" className="text-gray-800">GBP £</option>
-            </select>
-          </div>
-
           {/* Mobile icons */}
           <div className="flex justify-around pt-2">
             <a
@@ -437,6 +398,22 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
             }`}>
               <Heart size={24} />
             </button>
+            {mounted && isAuthenticated && (
+              <button 
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setShowOrdersModal(true);
+                }}
+                className={`p-3 rounded-xl transition-all duration-300 ${
+                  isScrolled
+                    ? 'text-gray-600 hover:bg-purple-50 hover:text-purple-600'
+                    : 'text-white hover:bg-white/10 hover:text-purple-300'
+                }`}
+                title="Mes commandes"
+              >
+                <Package size={24} />
+              </button>
+            )}
             <button 
               onClick={() => onShowLogin()}
               className={`p-3 rounded-xl transition-all duration-300 ${
@@ -465,6 +442,13 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
       </div>
 
     </header>
+    
+    {/* Orders Modal */}
+    <OrdersModal 
+      isOpen={showOrdersModal} 
+      onClose={() => setShowOrdersModal(false)} 
+    />
+  </>
   );
 };
 

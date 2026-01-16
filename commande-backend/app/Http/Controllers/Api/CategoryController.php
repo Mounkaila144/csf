@@ -14,10 +14,25 @@ class CategoryController extends Controller
     {
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
-        
-        $categories = Category::with('subcategories')
-            ->where('is_active', true)
-            ->paginate($perPage);
+
+        $query = Category::with('subcategories');
+
+        // Si c'est un vendeur (route /api/vendor/categories), filtrer par vendor_id
+        if (str_contains($request->getPathInfo(), '/vendor/')) {
+            $query->where('vendor_id', auth()->id());
+        }
+        // Si c'est pour l'admin (route /api/admin/categories), on montre toutes les catégories
+        elseif (str_contains($request->getPathInfo(), '/admin/')) {
+            // Admin voit tout - pas de filtre
+            if ($request->has('status')) {
+                $query->where('is_active', $request->status === 'active');
+            }
+        } else {
+            // Route publique - montrer seulement les actives
+            $query->where('is_active', true);
+        }
+
+        $categories = $query->paginate($perPage);
 
         return response()->json([
             'status' => 'success',
@@ -53,6 +68,11 @@ class CategoryController extends Controller
 
         $categoryData = $request->only(['name', 'description', 'is_active']);
 
+        // Si c'est un vendeur, ajouter automatiquement vendor_id
+        if (auth()->user()->isVendor()) {
+            $categoryData['vendor_id'] = auth()->id();
+        }
+
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('categories', 'public');
             $categoryData['image'] = $imagePath;
@@ -69,6 +89,14 @@ class CategoryController extends Controller
 
     public function show(Category $category)
     {
+        // Vérifier que le vendeur peut voir cette catégorie
+        if (auth()->user()->isVendor() && $category->vendor_id !== auth()->id()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized to view this category'
+            ], 403);
+        }
+
         $category->load(['subcategories', 'products']);
 
         return response()->json([
@@ -79,6 +107,14 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
+        // Vérifier que le vendeur peut modifier cette catégorie
+        if (auth()->user()->isVendor() && $category->vendor_id !== auth()->id()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized to update this category'
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -117,6 +153,14 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
+        // Vérifier que le vendeur peut supprimer cette catégorie
+        if (auth()->user()->isVendor() && $category->vendor_id !== auth()->id()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized to delete this category'
+            ], 403);
+        }
+
         // Delete image if exists
         if ($category->image) {
             Storage::disk('public')->delete($category->image);
@@ -130,11 +174,18 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function getActiveCategories()
+    public function getActiveCategories(Request $request)
     {
-        $categories = Category::with(['subcategories' => function($query) {
+        $query = Category::with(['subcategories' => function($query) {
             $query->where('is_active', true);
-        }])->where('is_active', true)->get();
+        }])->where('is_active', true);
+
+        // Si c'est un vendeur, filtrer par vendor_id
+        if (auth()->check() && auth()->user()->isVendor()) {
+            $query->where('vendor_id', auth()->id());
+        }
+
+        $categories = $query->get();
 
         return response()->json([
             'status' => 'success',

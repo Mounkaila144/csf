@@ -191,8 +191,8 @@ export default function ImageUpload({
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {images.map((image, index) => (
-              <div
-                key={`${image}-${index}`}
+                  <div
+                      key={`${image}-${index}`}
                 className="relative aspect-square group rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-400 transition-colors"
               >
                 {/* Badge première image */}

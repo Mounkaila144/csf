@@ -51,6 +51,55 @@ class AuthController extends Controller
         ], 201);
     }
 
+    public function registerVendor(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+            'shop_name' => 'required|string|max:255',
+            'shop_description' => 'nullable|string|max:1000',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 400);
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'vendor',
+            'vendor_status' => 'pending',
+            'shop_name' => $request->shop_name,
+            'shop_description' => $request->shop_description,
+            'phone' => $request->phone,
+            'address' => $request->address,
+        ]);
+
+        $token = JWTAuth::fromUser($user);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Vendor registration successful. Your account is pending approval.',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'vendor_status' => $user->vendor_status,
+                'shop_name' => $user->shop_name,
+            ],
+            'token' => $token
+        ], 201);
+    }
+
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -77,15 +126,42 @@ class AuthController extends Controller
 
         $user = JWTAuth::user();
 
+        // Informations de base pour tous les utilisateurs
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role
+        ];
+
+        // Ajouter les informations vendeur si applicable
+        if ($user->isVendor()) {
+            $userData['vendor_status'] = $user->vendor_status;
+            $userData['shop_name'] = $user->shop_name;
+            $userData['shop_description'] = $user->shop_description;
+            $userData['shop_logo'] = $user->shop_logo;
+
+            // Vérifier si le vendeur est suspendu
+            if ($user->vendor_status === 'suspended') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Your vendor account has been suspended. Reason: ' . $user->rejection_reason,
+                ], 403);
+            }
+
+            // Vérifier si le vendeur est rejeté
+            if ($user->vendor_status === 'rejected') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Your vendor application has been rejected. Reason: ' . $user->rejection_reason,
+                ], 403);
+            }
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Login successful',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role
-            ],
+            'user' => $userData,
             'token' => $token
         ]);
     }
@@ -106,14 +182,28 @@ class AuthController extends Controller
             ], 401);
         }
 
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role
+        ];
+
+        // Ajouter les informations vendeur si applicable
+        if ($user->isVendor()) {
+            $userData['vendor_status'] = $user->vendor_status;
+            $userData['shop_name'] = $user->shop_name;
+            $userData['shop_description'] = $user->shop_description;
+            $userData['shop_logo'] = $user->shop_logo;
+            $userData['phone'] = $user->phone;
+            $userData['address'] = $user->address;
+            $userData['approved_at'] = $user->approved_at;
+            $userData['rejection_reason'] = $user->rejection_reason;
+        }
+
         return response()->json([
             'status' => 'success',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role
-            ]
+            'user' => $userData
         ]);
     }
 

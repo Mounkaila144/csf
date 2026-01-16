@@ -10,6 +10,7 @@ class Category extends Model
     use HasFactory;
 
     protected $fillable = [
+        'vendor_id',
         'name',
         'description',
         'image',
@@ -19,6 +20,11 @@ class Category extends Model
     protected $casts = [
         'is_active' => 'boolean'
     ];
+
+    public function vendor()
+    {
+        return $this->belongsTo(User::class, 'vendor_id');
+    }
 
     public function subcategories()
     {

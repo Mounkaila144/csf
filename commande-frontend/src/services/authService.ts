@@ -4,7 +4,9 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'admin' | 'client';
+  role: 'admin' | 'client' | 'vendor';
+  vendor_status?: 'pending' | 'approved' | 'rejected' | 'suspended';
+  shop_name?: string;
 }
 
 export interface AuthResponse {
@@ -19,7 +21,11 @@ export interface RegisterData {
   email: string;
   password: string;
   password_confirmation: string;
-  role?: 'admin' | 'client';
+  role?: 'admin' | 'client' | 'vendor';
+  shop_name?: string;
+  shop_description?: string;
+  phone?: string;
+  address?: string;
 }
 
 export interface LoginData {
@@ -32,7 +38,7 @@ class AuthService {
     return typeof window !== 'undefined';
   }
 
-  private getToken(): string | null {
+  getToken(): string | null {
     if (!this.isClient()) return null;
     return localStorage.getItem('auth_token');
   }
@@ -65,7 +71,12 @@ class AuthService {
   }
 
   async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    // Utiliser le bon endpoint en fonction du rôle
+    const endpoint = data.role === 'vendor'
+      ? `${API_BASE_URL}/auth/register/vendor`
+      : `${API_BASE_URL}/auth/register`;
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

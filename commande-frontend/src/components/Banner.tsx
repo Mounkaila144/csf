@@ -8,13 +8,15 @@ interface BannerItem {
   image: string;
   cta: string;
   color: string;
+  action?: 'scroll' | 'register-vendor' | 'whatsapp';
 }
 
 interface BannerProps {
   banners: BannerItem[];
+  onRegisterVendor?: () => void;
 }
 
-const Banner: React.FC<BannerProps> = ({ banners }) => {
+const Banner: React.FC<BannerProps> = ({ banners, onRegisterVendor }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -31,6 +33,39 @@ const Banner: React.FC<BannerProps> = ({ banners }) => {
 
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
+  };
+
+  const handleBannerAction = (action?: string) => {
+    switch (action) {
+      case 'whatsapp':
+        // Rediriger vers WhatsApp avec un message pré-rempli
+        const message = encodeURIComponent('Bonjour, je souhaite obtenir un devis pour vos services de transport.');
+        window.open(`https://wa.me/8615057804948?text=${message}`, '_blank');
+        break;
+      
+      case 'register-vendor':
+        // Ouvrir le modal d'inscription vendeur
+        if (onRegisterVendor) {
+          onRegisterVendor();
+        }
+        break;
+      
+      case 'scroll':
+        // Scroll vers les produits
+        const productsSection = document.querySelector('main');
+        if (productsSection) {
+          productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        break;
+      
+      default:
+        // Action par défaut : scroll vers les produits
+        const defaultSection = document.querySelector('main');
+        if (defaultSection) {
+          defaultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        break;
+    }
   };
 
   return (
@@ -56,9 +91,12 @@ const Banner: React.FC<BannerProps> = ({ banners }) => {
                 <p className="text-lg md:text-xl mb-6 drop-shadow-lg">
                   {banner.subtitle}
                 </p>
-                <button className={`${
-                  banner.color === 'gold' ? 'bg-custom-blue hover:bg-custom-blue-hover' : 'bg-custom-blue hover:bg-custom-blue-hover'
-                } text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl transform hover:scale-105`}>
+                <button 
+                  onClick={() => handleBannerAction(banner.action)}
+                  className={`${
+                    banner.color === 'gold' ? 'bg-custom-blue hover:bg-custom-blue-hover' : 'bg-custom-blue hover:bg-custom-blue-hover'
+                  } text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl transform hover:scale-105`}
+                >
                   {banner.cta}
                 </button>
               </div>

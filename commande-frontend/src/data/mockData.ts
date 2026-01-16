@@ -182,7 +182,8 @@ export const banners = [
     subtitle: 'Plus de 5 ans d\'expérience - Livraison rapide et sécurisée depuis la Chine',
     image: 'https://images.pexels.com/photos/7679720/pexels-photo-7679720.jpeg?auto=compress&cs=tinysrgb&w=1200',
     cta: 'Découvrir nos services',
-    color: 'blue'
+    color: 'blue',
+    action: 'scroll' // Scroll vers les produits
   },
   {
     id: 2,
@@ -190,7 +191,8 @@ export const banners = [
     subtitle: 'Devenez ambassadeur et profitez d\'une source de revenus avec nos partenaires chinois',
     image: 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=1200',
     cta: 'Devenir Ambassadeur',
-    color: 'blue'
+    color: 'blue',
+    action: 'register-vendor' // Ouvrir le modal d'inscription vendeur
   },
   {
     id: 3,
@@ -198,6 +200,7 @@ export const banners = [
     subtitle: 'Transport aérien, maritime et routier - Solutions sur mesure pour vos besoins',
     image: 'https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg?auto=compress&cs=tinysrgb&w=1200',
     cta: 'Demander un devis',
-    color: 'blue'
+    color: 'blue',
+    action: 'whatsapp' // Rediriger vers WhatsApp
   }
 ];

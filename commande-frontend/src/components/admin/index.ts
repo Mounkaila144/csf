@@ -10,6 +10,10 @@ export { default as ProductForm } from './ProductForm';
 // Tableaux
 export { default as CategoryTable } from './CategoryTable';
 export { default as ProductTable } from './ProductTable';
+export { default as VendorTable } from './VendorTable';
+
+// Modals
+export { default as VendorDetailsModal } from './VendorDetailsModal';
 
 // Composants utilitaires
 export { default as Pagination } from './Pagination';

@@ -1,4 +1,4 @@
-import { ProductFormData, AdminProduct } from '../types';
+import { ProductFormData, AdminProduct, AdminCategory, AdminSubcategory, SubcategoryFormData, CategoryFormData } from '../types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ;
@@ -30,38 +30,6 @@ export interface PaginatedResponse<T> {
   };
 }
 
-// Types pour les catégories
-export interface CategoryData {
-  id?: number;
-  name: string;
-  description?: string;
-  status: 'active' | 'inactive';
-}
-
-export interface Category extends CategoryData {
-  id: number;
-  created_at: string;
-  updated_at: string;
-  products_count?: number;
-}
-
-// Types pour les sous-catégories
-export interface SubcategoryData {
-  id?: number;
-  name: string;
-  description?: string;
-  category_id: number;
-  status: 'active' | 'inactive';
-}
-
-export interface Subcategory extends SubcategoryData {
-  id: number;
-  created_at: string;
-  updated_at: string;
-  category?: Category;
-  products_count?: number;
-}
-
 
 class AdminService {
   private getToken(): string | null {
@@ -89,7 +57,7 @@ class AdminService {
 
   // ==================== CATEGORIES ====================
   
-  async getCategories(page = 1, perPage = 10): Promise<PaginatedResponse<Category>> {
+  async getCategories(page = 1, perPage = 10): Promise<PaginatedResponse<AdminCategory>> {
     const response = await fetch(
       `${API_BASE_URL}/admin/categories?page=${page}&per_page=${perPage}`,
       {
@@ -98,36 +66,36 @@ class AdminService {
       }
     );
     
-    return this.handleResponse<PaginatedResponse<Category>>(response);
+    return this.handleResponse<PaginatedResponse<AdminCategory>>(response);
   }
 
-  async getCategory(id: number): Promise<ApiResponse<Category>> {
+  async getCategory(id: number): Promise<ApiResponse<AdminCategory>> {
     const response = await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
       method: 'GET',
       headers: this.getHeaders(),
     });
     
-    return this.handleResponse<ApiResponse<Category>>(response);
+    return this.handleResponse<ApiResponse<AdminCategory>>(response);
   }
 
-  async createCategory(data: CategoryData): Promise<ApiResponse<Category>> {
+  async createCategory(data: CategoryFormData): Promise<ApiResponse<AdminCategory>> {
     const response = await fetch(`${API_BASE_URL}/admin/categories`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
     });
     
-    return this.handleResponse<ApiResponse<Category>>(response);
+    return this.handleResponse<ApiResponse<AdminCategory>>(response);
   }
 
-  async updateCategory(id: number, data: CategoryData): Promise<ApiResponse<Category>> {
+  async updateCategory(id: number, data: CategoryFormData): Promise<ApiResponse<AdminCategory>> {
     const response = await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
       method: 'PUT',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
     });
     
-    return this.handleResponse<ApiResponse<Category>>(response);
+    return this.handleResponse<ApiResponse<AdminCategory>>(response);
   }
 
   async deleteCategory(id: number): Promise<ApiResponse<null>> {
@@ -141,7 +109,7 @@ class AdminService {
 
   // ==================== SUBCATEGORIES ====================
   
-  async getSubcategories(page = 1, perPage = 10, categoryId?: number): Promise<PaginatedResponse<Subcategory>> {
+  async getSubcategories(page = 1, perPage = 10, categoryId?: number): Promise<PaginatedResponse<AdminSubcategory>> {
     let url = `${API_BASE_URL}/admin/subcategories?page=${page}&per_page=${perPage}`;
     if (categoryId) {
       url += `&category_id=${categoryId}`;
@@ -152,36 +120,36 @@ class AdminService {
       headers: this.getHeaders(),
     });
     
-    return this.handleResponse<PaginatedResponse<Subcategory>>(response);
+    return this.handleResponse<PaginatedResponse<AdminSubcategory>>(response);
   }
 
-  async getSubcategory(id: number): Promise<ApiResponse<Subcategory>> {
+  async getSubcategory(id: number): Promise<ApiResponse<AdminSubcategory>> {
     const response = await fetch(`${API_BASE_URL}/admin/subcategories/${id}`, {
       method: 'GET',
       headers: this.getHeaders(),
     });
     
-    return this.handleResponse<ApiResponse<Subcategory>>(response);
+    return this.handleResponse<ApiResponse<AdminSubcategory>>(response);
   }
 
-  async createSubcategory(data: SubcategoryData): Promise<ApiResponse<Subcategory>> {
+  async createSubcategory(data: SubcategoryFormData): Promise<ApiResponse<AdminSubcategory>> {
     const response = await fetch(`${API_BASE_URL}/admin/subcategories`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
     });
     
-    return this.handleResponse<ApiResponse<Subcategory>>(response);
+    return this.handleResponse<ApiResponse<AdminSubcategory>>(response);
   }
 
-  async updateSubcategory(id: number, data: SubcategoryData): Promise<ApiResponse<Subcategory>> {
+  async updateSubcategory(id: number, data: SubcategoryFormData): Promise<ApiResponse<AdminSubcategory>> {
     const response = await fetch(`${API_BASE_URL}/admin/subcategories/${id}`, {
       method: 'PUT',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
     });
     
-    return this.handleResponse<ApiResponse<Subcategory>>(response);
+    return this.handleResponse<ApiResponse<AdminSubcategory>>(response);
   }
 
   async deleteSubcategory(id: number): Promise<ApiResponse<null>> {
@@ -304,6 +272,95 @@ class AdminService {
     });
 
     return this.handleResponse<ApiResponse<null>>(response);
+  }
+
+  // ==================== VENDORS ====================
+
+  async getVendors(page = 1, perPage = 10, filters?: {
+    status?: string;
+    search?: string;
+  }): Promise<PaginatedResponse<any>> {
+    let url = `${API_BASE_URL}/admin/vendors?page=${page}&per_page=${perPage}`;
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== '') {
+          url += `&${key}=${encodeURIComponent(value)}`;
+        }
+      });
+    }
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+
+    return this.handleResponse<PaginatedResponse<any>>(response);
+  }
+
+  async getVendor(id: number): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/admin/vendors/${id}`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+
+    return this.handleResponse<ApiResponse<any>>(response);
+  }
+
+  async approveVendor(id: number): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/admin/vendors/${id}/approve`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+    });
+
+    return this.handleResponse<ApiResponse<any>>(response);
+  }
+
+  async rejectVendor(id: number, reason: string): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/admin/vendors/${id}/reject`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ reason }),
+    });
+
+    return this.handleResponse<ApiResponse<any>>(response);
+  }
+
+  async suspendVendor(id: number, reason: string): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/admin/vendors/${id}/suspend`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ reason }),
+    });
+
+    return this.handleResponse<ApiResponse<any>>(response);
+  }
+
+  async reactivateVendor(id: number): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/admin/vendors/${id}/reactivate`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+    });
+
+    return this.handleResponse<ApiResponse<any>>(response);
+  }
+
+  async deleteVendor(id: number): Promise<ApiResponse<null>> {
+    const response = await fetch(`${API_BASE_URL}/admin/vendors/${id}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    });
+
+    return this.handleResponse<ApiResponse<null>>(response);
+  }
+
+  async getVendorStatistics(): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/admin/vendors/statistics`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+
+    return this.handleResponse<ApiResponse<any>>(response);
   }
 }
 

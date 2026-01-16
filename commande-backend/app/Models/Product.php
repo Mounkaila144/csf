@@ -10,6 +10,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
+        'vendor_id',
         'name',
         'description',
         'price',
@@ -27,6 +28,11 @@ class Product extends Model
         'is_active' => 'boolean',
         'status' => 'array'
     ];
+
+    public function vendor()
+    {
+        return $this->belongsTo(User::class, 'vendor_id');
+    }
 
     public function category()
     {

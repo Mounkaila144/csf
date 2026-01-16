@@ -13,9 +13,10 @@ import { publicService, PublicProduct, PublicCategory } from '../services/public
 
 interface HomeProps {
   searchQuery?: string;
+  onShowRegister?: () => void;
 }
 
-export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
+export const Home: React.FC<HomeProps> = ({ searchQuery = '', onShowRegister }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
@@ -158,7 +159,7 @@ export const Home: React.FC<HomeProps> = ({ searchQuery = '' }) => {
       />
       
       {/* Banner */}
-      <Banner banners={banners} />
+      <Banner banners={banners} onRegisterVendor={onShowRegister} />
       
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-8">

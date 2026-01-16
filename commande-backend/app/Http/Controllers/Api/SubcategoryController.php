@@ -15,14 +15,28 @@ class SubcategoryController extends Controller
     {
         $perPage = $request->get('per_page', 10);
         $categoryId = $request->get('category_id');
-        
-        $query = Subcategory::with(['category', 'products'])
-            ->where('is_active', true);
-            
+
+        $query = Subcategory::with(['category', 'products']);
+
+        // Si c'est un vendeur (route /api/vendor/subcategories), filtrer par vendor_id
+        if (str_contains($request->getPathInfo(), '/vendor/')) {
+            $query->where('vendor_id', auth()->id());
+        }
+        // Si c'est pour l'admin (route /api/admin/subcategories), on montre toutes les sous-catégories
+        elseif (str_contains($request->getPathInfo(), '/admin/')) {
+            // Admin voit tout - pas de filtre
+            if ($request->has('status')) {
+                $query->where('is_active', $request->status === 'active');
+            }
+        } else {
+            // Route publique - montrer seulement les actives
+            $query->where('is_active', true);
+        }
+
         if ($categoryId) {
             $query->where('category_id', $categoryId);
         }
-        
+
         $subcategories = $query->paginate($perPage);
 
         return response()->json([
@@ -60,6 +74,21 @@ class SubcategoryController extends Controller
 
         $subcategoryData = $request->only(['name', 'description', 'category_id', 'is_active']);
 
+        // Si c'est un vendeur, vérifier que la catégorie parent lui appartient et ajouter vendor_id
+        if (auth()->user()->isVendor()) {
+            $category = Category::find($request->category_id);
+
+            // Vérifier que la catégorie existe et appartient au vendeur
+            if (!$category || ($category->vendor_id && $category->vendor_id !== auth()->id())) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Vous ne pouvez créer une sous-catégorie que pour vos propres catégories'
+                ], 403);
+            }
+
+            $subcategoryData['vendor_id'] = auth()->id();
+        }
+
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('subcategories', 'public');
             $subcategoryData['image'] = $imagePath;
@@ -77,6 +106,14 @@ class SubcategoryController extends Controller
 
     public function show(Subcategory $subcategory)
     {
+        // Vérifier que le vendeur peut voir cette sous-catégorie
+        if (auth()->user()->isVendor() && $subcategory->vendor_id !== auth()->id()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized to view this subcategory'
+            ], 403);
+        }
+
         $subcategory->load(['category', 'products']);
 
         return response()->json([
@@ -87,6 +124,14 @@ class SubcategoryController extends Controller
 
     public function update(Request $request, Subcategory $subcategory)
     {
+        // Vérifier que le vendeur peut modifier cette sous-catégorie
+        if (auth()->user()->isVendor() && $subcategory->vendor_id !== auth()->id()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized to update this subcategory'
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -127,6 +172,14 @@ class SubcategoryController extends Controller
 
     public function destroy(Subcategory $subcategory)
     {
+        // Vérifier que le vendeur peut supprimer cette sous-catégorie
+        if (auth()->user()->isVendor() && $subcategory->vendor_id !== auth()->id()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized to delete this subcategory'
+            ], 403);
+        }
+
         // Delete image if exists
         if ($subcategory->image) {
             Storage::disk('public')->delete($subcategory->image);
@@ -140,10 +193,17 @@ class SubcategoryController extends Controller
         ]);
     }
 
-    public function getByCategory($categoryId)
+    public function getByCategory(Request $request, $categoryId)
     {
         $category = Category::findOrFail($categoryId);
-        $subcategories = $category->subcategories()->where('is_active', true)->get();
+        $query = $category->subcategories()->where('is_active', true);
+
+        // Si c'est un vendeur, filtrer par vendor_id
+        if (auth()->check() && auth()->user()->isVendor()) {
+            $query->where('vendor_id', auth()->id());
+        }
+
+        $subcategories = $query->get();
 
         return response()->json([
             'status' => 'success',
@@ -151,11 +211,17 @@ class SubcategoryController extends Controller
         ]);
     }
 
-    public function getActiveSubcategories()
+    public function getActiveSubcategories(Request $request)
     {
-        $subcategories = Subcategory::with('category')
-            ->where('is_active', true)
-            ->get();
+        $query = Subcategory::with('category')
+            ->where('is_active', true);
+
+        // Si c'est un vendeur, filtrer par vendor_id
+        if (auth()->check() && auth()->user()->isVendor()) {
+            $query->where('vendor_id', auth()->id());
+        }
+
+        $subcategories = $query->get();
 
         return response()->json([
             'status' => 'success',

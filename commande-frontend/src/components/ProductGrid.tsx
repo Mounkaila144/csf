@@ -15,18 +15,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   onToggleFavorite,
   favorites = []
 }) => {
-  console.log('ProductGrid received:', { products, filters });
-  console.log('ProductGrid checks:', {
-    hasFilters: !!filters,
-    hasPriceRange: !!(filters?.priceRange),
-    priceRange: filters?.priceRange,
-    isArray: Array.isArray(products),
-    productsLength: products.length
-  });
-
   // Early return if filters is undefined or products is empty
   if (!filters || !filters.priceRange || !Array.isArray(products) || products.length === 0) {
-    console.log('ProductGrid returning early - no products to display');
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
@@ -41,35 +31,28 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   // Filter and sort products with additional safety checks
   const filteredProducts = products
     .filter(product => {
-      console.log('ProductGrid filtering product:', product.name, 'price:', product.price);
-      
       // Safety check for product
       if (!product || typeof product !== 'object') {
-        console.log('Product failed safety check');
         return false;
       }
 
       // Price filter - with safety checks
       if (filters.priceRange && Array.isArray(filters.priceRange) && filters.priceRange.length >= 2) {
         if (typeof product.price === 'number' && (product.price < filters.priceRange[0] || product.price > filters.priceRange[1])) {
-          console.log('Product filtered out by price:', product.price, 'range:', filters.priceRange);
           return false;
         }
       }
 
       // Rating filter
       if (filters.rating && filters.rating > 0 && typeof product.rating === 'number' && product.rating < filters.rating) {
-        console.log('Product filtered out by rating:', product.rating, 'min:', filters.rating);
         return false;
       }
 
       // Free shipping filter
       if (filters.freeShipping && !product.freeShipping) {
-        console.log('Product filtered out by free shipping');
         return false;
       }
 
-      console.log('Product passed all ProductGrid filters');
       return true;
     })
     .sort((a, b) => {
@@ -90,8 +73,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           return (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0);
       }
     });
-
-  console.log('ProductGrid final filtered products:', filteredProducts.length);
 
   return (
     <div className="space-y-4 sm:space-y-6">

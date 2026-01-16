@@ -14,12 +14,10 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [registerAsVendor, setRegisterAsVendor] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const { totalItems } = useCart();
-
-
-
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -29,7 +27,8 @@ export default function HomePage() {
     setShowLoginModal(true);
   };
 
-  const handleShowRegister = () => {
+  const handleShowRegister = (asVendor = false) => {
+    setRegisterAsVendor(asVendor);
     setShowRegisterModal(true);
   };
 
@@ -46,13 +45,11 @@ export default function HomePage() {
           cartItemCount={totalItems}
           onSearch={handleSearch}
           onShowLogin={handleShowLogin}
-          onShowRegister={handleShowRegister}
+          onShowRegister={() => handleShowRegister(false)}
           onOpenCart={handleOpenCart}
         />
 
-
-
-        <Home searchQuery={searchQuery} />
+        <Home searchQuery={searchQuery} onShowRegister={() => handleShowRegister(true)} />
 
         <LoginModal
           isOpen={showLoginModal}
@@ -65,11 +62,16 @@ export default function HomePage() {
 
         <RegisterModal
           isOpen={showRegisterModal}
-          onClose={() => setShowRegisterModal(false)}
+          onClose={() => {
+            setShowRegisterModal(false);
+            setRegisterAsVendor(false);
+          }}
           onSwitchToLogin={() => {
             setShowRegisterModal(false);
+            setRegisterAsVendor(false);
             setShowLoginModal(true);
           }}
+          defaultRole={registerAsVendor ? 'vendor' : 'client'}
         />
 
         <CartSidebar

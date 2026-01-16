@@ -78,9 +78,20 @@ npm run build
 
 ### Authentication & Authorization
 - JWT-based authentication with role-based access control
-- Two main roles: `admin` and `client`
-- Protected routes using middleware: `auth:api` and `role:admin,client`
+- Three main roles: `admin`, `vendor`, and `client`
+- Protected routes using middleware: `auth:api` and `role:admin,vendor,client`
+- Vendor approval system with statuses: `pending`, `approved`, `rejected`, `suspended`
+- Vendors must be approved to access vendor routes (middleware: `vendor.approved`)
 - Token refresh mechanism implemented
+- **Important**: Admin routes use `/api/admin/*` prefix, vendor routes use `/api/vendor/*` prefix
+
+### Frontend Service Pattern
+- Shared components between admin and vendor interfaces use dynamic service selection
+- Components accept optional `useVendorService` prop (default: false)
+- Pattern: `const service = useVendorService ? vendorService : adminService`
+- Examples: `SubcategoriesModal`, `ProductForm`
+- Ensures proper API routes are used based on user role
+- Maintains backward compatibility with admin interfaces
 
 ### API Structure
 - RESTful API design with consistent JSON responses
@@ -91,8 +102,11 @@ npm run build
 ### Frontend Architecture
 - Next.js App Router with nested layouts
 - Admin panel at `/admin` with protected routes
+  - Dashboard, Categories, Products, **Vendors**, Orders
+  - Vendor management: approve, reject, suspend, reactivate vendors
+- Vendor panel at `/vendor` with protected routes (requires approved status)
 - Component-based architecture with TypeScript
-- Service layer for API communication (`adminService.ts`)
+- Service layer for API communication (`adminService.ts`, `vendorService.ts`)
 - Custom hooks for state management
 - TailwindCSS for styling with custom color scheme
 
@@ -111,10 +125,14 @@ npm run build
 
 ### Key API Endpoints
 - Authentication: `/api/auth/*`
-- Products: `/api/products/*`
-- Categories: `/api/categories/*`
-- Subcategories: `/api/subcategories/*`
-- File uploads: `/api/uploads/*`
+- Public Products: `/api/products/*` (no auth required)
+- Public Categories: `/api/categories/*` (no auth required)
+- Public Subcategories: `/api/subcategories/*` (no auth required)
+- Admin Routes: `/api/admin/*` (requires `role:admin`)
+- Vendor Routes: `/api/vendor/*` (requires `role:vendor` + `vendor_status:approved`)
+- File uploads: `/api/upload/*` (admin or approved vendors)
+- Orders: `/api/orders/*` (admin or clients)
+- Currency: `/api/currency/*` (public)
 
 ## File Structure Highlights
 - Frontend admin components: `src/components/admin/`

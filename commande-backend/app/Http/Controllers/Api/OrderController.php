@@ -12,11 +12,6 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:api');
-    }
-
     public function index()
     {
         $user = Auth::user();
@@ -26,6 +21,24 @@ class OrderController extends Controller
         } else {
             $orders = Order::with(['orderItems.product'])->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
         }
+
+        // Format images URLs for frontend
+        $orders->each(function ($order) {
+            if ($order->orderItems) {
+                $order->orderItems->each(function ($item) {
+                    if ($item->product && $item->product->images) {
+                        $item->product->images = array_map(function ($image) {
+                            // If image is already a full URL, return as is
+                            if (str_starts_with($image, 'http')) {
+                                return $image;
+                            }
+                            // Otherwise, prepend storage path
+                            return url('storage/' . $image);
+                        }, $item->product->images);
+                    }
+                });
+            }
+        });
 
         return response()->json([
             'status' => 'success',
@@ -121,6 +134,22 @@ class OrderController extends Controller
                 'status' => 'error',
                 'message' => 'Order not found'
             ], 404);
+        }
+
+        // Format images URLs for frontend
+        if ($order->orderItems) {
+            $order->orderItems->each(function ($item) {
+                if ($item->product && $item->product->images) {
+                    $item->product->images = array_map(function ($image) {
+                        // If image is already a full URL, return as is
+                        if (str_starts_with($image, 'http')) {
+                            return $image;
+                        }
+                        // Otherwise, prepend storage path
+                        return url('storage/' . $image);
+                    }, $item->product->images);
+                }
+            });
         }
 
         return response()->json([

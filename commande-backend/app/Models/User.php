@@ -23,6 +23,15 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'role',
+        'vendor_status',
+        'shop_name',
+        'shop_description',
+        'shop_logo',
+        'phone',
+        'address',
+        'approved_at',
+        'approved_by',
+        'rejection_reason',
     ];
 
     /**
@@ -43,6 +52,7 @@ class User extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'approved_at' => 'datetime',
     ];
 
     public function getJWTIdentifier()
@@ -63,5 +73,56 @@ class User extends Authenticatable implements JWTSubject
     public function isClient()
     {
         return $this->role === 'client';
+    }
+
+    public function isVendor()
+    {
+        return $this->role === 'vendor';
+    }
+
+    public function isApprovedVendor()
+    {
+        return $this->isVendor() && $this->vendor_status === 'approved';
+    }
+
+    public function isPendingVendor()
+    {
+        return $this->isVendor() && $this->vendor_status === 'pending';
+    }
+
+    public function isRejectedVendor()
+    {
+        return $this->isVendor() && $this->vendor_status === 'rejected';
+    }
+
+    public function isSuspendedVendor()
+    {
+        return $this->isVendor() && $this->vendor_status === 'suspended';
+    }
+
+    // Relations
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'vendor_id');
+    }
+
+    public function categories()
+    {
+        return $this->hasMany(Category::class, 'vendor_id');
+    }
+
+    public function subcategories()
+    {
+        return $this->hasMany(Subcategory::class, 'vendor_id');
+    }
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function approvedVendors()
+    {
+        return $this->hasMany(User::class, 'approved_by');
     }
 }

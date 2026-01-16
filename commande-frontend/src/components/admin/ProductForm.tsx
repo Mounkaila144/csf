@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { AdminProduct, ProductFormData, AdminCategory, AdminSubcategory, ProductStatus } from '../../types';
 import { adminService, getFullImageUrl } from '../../services/adminService';
+import { vendorService } from '../../services/vendorService';
 import { PRODUCT_STATUSES } from '../../constants/productStatus';
 import ImageUpload from './ImageUpload';
 
@@ -12,6 +13,7 @@ interface ProductFormProps {
   onSubmit: (data: ProductFormData) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
+  useVendorService?: boolean; // Nouveau prop pour déterminer quel service utiliser
 }
 
 export default function ProductForm({ 
@@ -19,7 +21,8 @@ export default function ProductForm({
   categories,
   onSubmit, 
   onCancel, 
-  isLoading = false 
+  isLoading = false,
+  useVendorService = false
 }: ProductFormProps) {
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
@@ -36,6 +39,9 @@ export default function ProductForm({
   const [subcategories, setSubcategories] = useState<AdminSubcategory[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pendingFiles, setPendingFiles] = useState<File[]>([]); // Fichiers en attente d'upload
+
+  // Sélectionner le service approprié
+  const service = useVendorService ? vendorService : adminService;
 
   useEffect(() => {
     if (product) {
@@ -60,7 +66,7 @@ export default function ProductForm({
 
   const loadSubcategories = async (categoryId: number) => {
     try {
-      const response = await adminService.getSubcategories(1, 100, categoryId);
+      const response = await service.getSubcategories(1, 100, categoryId);
       setSubcategories(response.data);
     } catch (error) {
       console.error('Erreur lors du chargement des sous-catégories:', error);
@@ -103,7 +109,7 @@ export default function ProductForm({
       // Si on a des fichiers en attente (mode création avec preview)
       if (pendingFiles.length > 0) {
         try {
-          const uploadedUrls = await adminService.uploadMultipleImages(pendingFiles);
+          const uploadedUrls = await service.uploadMultipleImages(pendingFiles);
           finalFormData.images = uploadedUrls;
         } catch (error) {
           console.error('Erreur lors de l\'upload des images:', error);
@@ -177,7 +183,7 @@ export default function ProductForm({
   const handleImagesUpload = async (files: File[]): Promise<string[]> => {
     try {
       // Upload immédiat uniquement en mode édition
-      const urls = await adminService.uploadMultipleImages(files);
+      const urls = await service.uploadMultipleImages(files);
       return urls;
     } catch (error) {
       console.error('Erreur lors de l\'upload des images:', error);

@@ -3,14 +3,16 @@
 import { useState, useEffect } from 'react';
 import { AdminCategory, AdminSubcategory, SubcategoryFormData } from '../../types';
 import { adminService } from '../../services/adminService';
+import { vendorService } from '../../services/vendorService';
 
 interface SubcategoriesModalProps {
   category: AdminCategory;
   isOpen: boolean;
   onClose: () => void;
+  useVendorService?: boolean; // Nouveau prop pour déterminer quel service utiliser
 }
 
-export default function SubcategoriesModal({ category, isOpen, onClose }: SubcategoriesModalProps) {
+export default function SubcategoriesModal({ category, isOpen, onClose, useVendorService = false }: SubcategoriesModalProps) {
   const [subcategories, setSubcategories] = useState<AdminSubcategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -25,6 +27,9 @@ export default function SubcategoriesModal({ category, isOpen, onClose }: Subcat
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Sélectionner le service approprié
+  const service = useVendorService ? vendorService : adminService;
+
   useEffect(() => {
     if (isOpen && category) {
       loadSubcategories();
@@ -34,7 +39,7 @@ export default function SubcategoriesModal({ category, isOpen, onClose }: Subcat
   const loadSubcategories = async () => {
     try {
       setLoading(true);
-      const response = await adminService.getSubcategories(1, 100, category.id);
+      const response = await service.getSubcategories(1, 100, category.id);
       setSubcategories(response.data);
     } catch (error) {
       console.error('Erreur lors du chargement des sous-catégories:', error);
@@ -50,9 +55,9 @@ export default function SubcategoriesModal({ category, isOpen, onClose }: Subcat
 
     try {
       if (editingSubcategory) {
-        await adminService.updateSubcategory(editingSubcategory.id, formData);
+        await service.updateSubcategory(editingSubcategory.id, formData);
       } else {
-        await adminService.createSubcategory(formData);
+        await service.createSubcategory(formData);
       }
       await loadSubcategories();
       resetForm();
@@ -83,7 +88,7 @@ export default function SubcategoriesModal({ category, isOpen, onClose }: Subcat
   const handleDelete = async (id: number, name: string) => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer la sous-catégorie &quot;${name}&quot; ?`)) {
       try {
-        await adminService.deleteSubcategory(id);
+        await service.deleteSubcategory(id);
         await loadSubcategories();
       } catch (error) {
         console.error('Erreur lors de la suppression:', error);
@@ -95,7 +100,7 @@ export default function SubcategoriesModal({ category, isOpen, onClose }: Subcat
     const subcategory = subcategories.find(s => s.id === id);
     if (subcategory) {
       try {
-        await adminService.updateSubcategory(id, { ...subcategory, is_active: !isActive });
+        await service.updateSubcategory(id, { ...subcategory, is_active: !isActive });
         await loadSubcategories();
       } catch (error) {
         console.error('Erreur lors du changement de statut:', error);
