@@ -37,7 +37,11 @@ export default function SubcategoriesPage() {
       const filters = categoryFilter !== 'all' ? { category_id: categoryFilter } : {};
       const response = await adminService.getSubcategories(meta?.current_page || 1, meta?.per_page || 10, categoryFilter !== 'all' ? Number(categoryFilter) : undefined);
       setSubcategories(response.data);
-      setMeta(response.meta);
+      setMeta({
+        ...response.meta,
+        from: response.meta.from || 0,
+        to: response.meta.to || 0
+      });
     } catch (error) {
       console.error('Erreur lors du chargement des sous-catégories:', error);
     } finally {

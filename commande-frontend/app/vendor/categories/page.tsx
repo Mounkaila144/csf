@@ -36,7 +36,11 @@ export default function VendorCategoriesPage() {
       setLoading(true);
       const response = await vendorService.getCategories(meta?.current_page || 1, meta?.per_page || 10);
       setCategories(response.data);
-      setMeta(response.meta);
+      setMeta({
+        ...response.meta,
+        from: response.meta.from || 0,
+        to: response.meta.to || 0
+      });
     } catch (error) {
       console.error('Erreur lors du chargement des catégories:', error);
     } finally {

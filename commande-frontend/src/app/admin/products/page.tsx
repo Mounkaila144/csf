@@ -114,11 +114,11 @@ export default function ProductsPage() {
     }
   };
 
-  const handleStatusChange = async (id: number, status: 'active' | 'inactive') => {
+  const handleStatusChange = async (id: number, isActive: boolean) => {
     try {
       const product = products.find(p => p.id === id);
       if (product) {
-        await adminService.updateProduct(id, { ...product, status });
+        await adminService.updateProduct(id, { ...product, is_active: isActive });
         await loadProducts();
       }
     } catch (error) {
@@ -145,7 +145,7 @@ export default function ProductsPage() {
   };
 
   const handleStatusFilterChange = (status: string) => {
-    setFilters(prev => ({ ...prev, status, page: 1 }));
+    setFilters(prev => ({ ...prev, status: status as '' | 'active' | 'inactive', page: 1 }));
   };
 
   const handleCategoryFilterChange = (category_id: string) => {

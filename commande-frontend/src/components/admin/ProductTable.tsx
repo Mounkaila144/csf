@@ -8,7 +8,7 @@ interface ProductTableProps {
   products: AdminProduct[];
   onEdit: (product: AdminProduct) => void;
   onDelete: (id: number) => void;
-  onStatusChange: (id: number, status: 'active' | 'inactive') => void;
+  onStatusChange: (id: number, isActive: boolean) => void;
   isLoading?: boolean;
 }
 
@@ -169,7 +169,7 @@ export default function ProductTable({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button
-                    onClick={() => onStatusChange(product.id, product.is_active ? 'inactive' : 'active')}
+                    onClick={() => onStatusChange(product.id, !product.is_active)}
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
                       product.is_active
                         ? 'bg-green-100 text-green-800 hover:bg-green-200'
