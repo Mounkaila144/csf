@@ -43,6 +43,15 @@ export default function ProductForm({
   // Sélectionner le service approprié
   const service = useVendorService ? vendorService : adminService;
 
+  const loadSubcategories = async (categoryId: number) => {
+    try {
+      const response = await service.getSubcategories(1, 100, categoryId);
+      setSubcategories(response.data);
+    } catch (error) {
+      console.error('Erreur lors du chargement des sous-catégories:', error);
+    }
+  };
+
   useEffect(() => {
     if (product) {
       setFormData({
@@ -63,15 +72,6 @@ export default function ProductForm({
       }
     }
   }, [product]);
-
-  const loadSubcategories = async (categoryId: number) => {
-    try {
-      const response = await service.getSubcategories(1, 100, categoryId);
-      setSubcategories(response.data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des sous-catégories:', error);
-    }
-  };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -104,7 +104,7 @@ export default function ProductForm({
     }
 
     try {
-      let finalFormData = { ...formData };
+      const finalFormData = { ...formData };
 
       // Si on a des fichiers en attente (mode création avec preview)
       if (pendingFiles.length > 0) {

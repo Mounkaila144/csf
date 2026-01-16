@@ -30,12 +30,6 @@ export default function SubcategoriesModal({ category, isOpen, onClose, useVendo
   // Sélectionner le service approprié
   const service = useVendorService ? vendorService : adminService;
 
-  useEffect(() => {
-    if (isOpen && category) {
-      loadSubcategories();
-    }
-  }, [isOpen, category]);
-
   const loadSubcategories = async () => {
     try {
       setLoading(true);
@@ -47,6 +41,12 @@ export default function SubcategoriesModal({ category, isOpen, onClose, useVendo
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isOpen && category) {
+      loadSubcategories();
+    }
+  }, [isOpen, category]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +86,7 @@ export default function SubcategoriesModal({ category, isOpen, onClose, useVendo
   };
 
   const handleDelete = async (id: number, name: string) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer la sous-catégorie &quot;${name}&quot; ?`)) {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer la sous-catégorie "${name}" ?`)) {
       try {
         await service.deleteSubcategory(id);
         await loadSubcategories();
@@ -280,7 +280,7 @@ export default function SubcategoriesModal({ category, isOpen, onClose, useVendo
               </svg>
               <p className="mt-2 text-lg font-medium text-gray-900">Aucune sous-catégorie</p>
               <p className="mt-1 text-sm text-gray-500">
-                Cette catégorie n'a pas encore de sous-catégories.
+                Cette catégorie n&apos;a pas encore de sous-catégories.
               </p>
             </div>
           ) : (

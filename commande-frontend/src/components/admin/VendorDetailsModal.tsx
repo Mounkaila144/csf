@@ -138,7 +138,7 @@ export default function VendorDetailsModal({
             <h3 className="text-lg font-medium text-gray-900 mb-4">Dates importantes</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date d'inscription</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date d&apos;inscription</label>
                 <p className="text-sm text-gray-900">
                   {new Date(vendor.created_at).toLocaleDateString('fr-FR', {
                     year: 'numeric',
@@ -151,7 +151,7 @@ export default function VendorDetailsModal({
               </div>
               {vendor.approved_at && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date d'approbation</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date d&apos;approbation</label>
                   <p className="text-sm text-gray-900">
                     {new Date(vendor.approved_at).toLocaleDateString('fr-FR', {
                       year: 'numeric',

@@ -7,13 +7,24 @@ import { Store, Mail, Lock, User, Phone, MapPin, FileText } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+interface FormData {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  shop_name: string;
+  shop_description: string;
+  phone: string;
+  address: string;
+}
+
 export default function VendorRegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     password: '',
@@ -77,8 +88,9 @@ export default function VendorRegisterPage() {
         router.push('/vendor/dashboard');
       }, 3000);
 
-    } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -304,7 +316,7 @@ export default function VendorRegisterPage() {
           {/* Note d'information */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-800">
-              <strong>Note :</strong> Votre compte sera examiné par un administrateur avant d'être activé.
+              <strong>Note :</strong> Votre compte sera examiné par un administrateur avant d&apos;être activé.
               Vous recevrez une notification par email une fois votre compte approuvé.
             </p>
           </div>

@@ -30,6 +30,22 @@ export interface PaginatedResponse<T> {
   };
 }
 
+interface VendorData {
+  id: number;
+  name: string;
+  email: string;
+  shop_name: string;
+  vendor_status: string;
+}
+
+interface VendorStatistics {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+  suspended: number;
+}
+
 
 class AdminService {
   private getToken(): string | null {
@@ -279,7 +295,7 @@ class AdminService {
   async getVendors(page = 1, perPage = 10, filters?: {
     status?: string;
     search?: string;
-  }): Promise<PaginatedResponse<any>> {
+  }): Promise<PaginatedResponse<VendorData>> {
     let url = `${API_BASE_URL}/admin/vendors?page=${page}&per_page=${perPage}`;
 
     if (filters) {
@@ -295,54 +311,54 @@ class AdminService {
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<PaginatedResponse<any>>(response);
+    return this.handleResponse<PaginatedResponse<VendorData>>(response);
   }
 
-  async getVendor(id: number): Promise<ApiResponse<any>> {
+  async getVendor(id: number): Promise<ApiResponse<VendorData>> {
     const response = await fetch(`${API_BASE_URL}/admin/vendors/${id}`, {
       method: 'GET',
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<ApiResponse<any>>(response);
+    return this.handleResponse<ApiResponse<VendorData>>(response);
   }
 
-  async approveVendor(id: number): Promise<ApiResponse<any>> {
+  async approveVendor(id: number): Promise<ApiResponse<VendorData>> {
     const response = await fetch(`${API_BASE_URL}/admin/vendors/${id}/approve`, {
       method: 'POST',
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<ApiResponse<any>>(response);
+    return this.handleResponse<ApiResponse<VendorData>>(response);
   }
 
-  async rejectVendor(id: number, reason: string): Promise<ApiResponse<any>> {
+  async rejectVendor(id: number, reason: string): Promise<ApiResponse<VendorData>> {
     const response = await fetch(`${API_BASE_URL}/admin/vendors/${id}/reject`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify({ reason }),
     });
 
-    return this.handleResponse<ApiResponse<any>>(response);
+    return this.handleResponse<ApiResponse<VendorData>>(response);
   }
 
-  async suspendVendor(id: number, reason: string): Promise<ApiResponse<any>> {
+  async suspendVendor(id: number, reason: string): Promise<ApiResponse<VendorData>> {
     const response = await fetch(`${API_BASE_URL}/admin/vendors/${id}/suspend`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify({ reason }),
     });
 
-    return this.handleResponse<ApiResponse<any>>(response);
+    return this.handleResponse<ApiResponse<VendorData>>(response);
   }
 
-  async reactivateVendor(id: number): Promise<ApiResponse<any>> {
+  async reactivateVendor(id: number): Promise<ApiResponse<VendorData>> {
     const response = await fetch(`${API_BASE_URL}/admin/vendors/${id}/reactivate`, {
       method: 'POST',
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<ApiResponse<any>>(response);
+    return this.handleResponse<ApiResponse<VendorData>>(response);
   }
 
   async deleteVendor(id: number): Promise<ApiResponse<null>> {
@@ -354,13 +370,13 @@ class AdminService {
     return this.handleResponse<ApiResponse<null>>(response);
   }
 
-  async getVendorStatistics(): Promise<ApiResponse<any>> {
+  async getVendorStatistics(): Promise<ApiResponse<VendorStatistics>> {
     const response = await fetch(`${API_BASE_URL}/admin/vendors/statistics`, {
       method: 'GET',
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<ApiResponse<any>>(response);
+    return this.handleResponse<ApiResponse<VendorStatistics>>(response);
   }
 }
 

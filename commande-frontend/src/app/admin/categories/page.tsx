@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import VendorLayout from '../../../src/components/vendor/VendorLayout';
+import AdminLayout from '../../../src/components/admin/AdminLayout';
 import CategoryTable from '../../../src/components/admin/CategoryTable';
 import CategoryForm from '../../../src/components/admin/CategoryForm';
 import Pagination from '../../../src/components/admin/Pagination';
 import SubcategoriesModal from '../../../src/components/admin/SubcategoriesModal';
-import { vendorService } from '../../../src/services/vendorService';
+import { adminService } from '../../../src/services/adminService';
 import { AdminCategory, CategoryFormData, PaginationMeta } from '../../../src/types';
 
-export default function VendorCategoriesPage() {
+export default function CategoriesPage() {
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>({
     current_page: 1,
@@ -34,7 +34,7 @@ export default function VendorCategoriesPage() {
   const loadCategories = async () => {
     try {
       setLoading(true);
-      const response = await vendorService.getCategories(meta?.current_page || 1, meta?.per_page || 10);
+      const response = await adminService.getCategories(meta?.current_page || 1, meta?.per_page || 10);
       setCategories(response.data);
       setMeta(response.meta);
     } catch (error) {
@@ -46,7 +46,7 @@ export default function VendorCategoriesPage() {
 
   const handleCreateCategory = async (data: CategoryFormData) => {
     try {
-      await vendorService.createCategory(data);
+      await adminService.createCategory(data);
       setShowForm(false);
       setEditingCategory(undefined);
       await loadCategories();
@@ -58,9 +58,9 @@ export default function VendorCategoriesPage() {
 
   const handleUpdateCategory = async (data: CategoryFormData) => {
     if (!editingCategory) return;
-
+    
     try {
-      await vendorService.updateCategory(editingCategory.id, data);
+      await adminService.updateCategory(editingCategory.id, data);
       setShowForm(false);
       setEditingCategory(undefined);
       await loadCategories();
@@ -72,7 +72,7 @@ export default function VendorCategoriesPage() {
 
   const handleDeleteCategory = async (id: number) => {
     try {
-      await vendorService.deleteCategory(id);
+      await adminService.deleteCategory(id);
       await loadCategories();
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
@@ -83,7 +83,7 @@ export default function VendorCategoriesPage() {
     try {
       const category = categories.find(c => c.id === id);
       if (category) {
-        await vendorService.updateCategory(id, { ...category, is_active: status === 'active' });
+        await adminService.updateCategory(id, { ...category, is_active: status === 'active' });
         await loadCategories();
       }
     } catch (error) {
@@ -117,19 +117,19 @@ export default function VendorCategoriesPage() {
 
   const filteredCategories = categories.filter(category => {
     const matchesSearch = category.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' ||
-      (statusFilter === 'active' && category.is_active) ||
+    const matchesStatus = statusFilter === 'all' || 
+      (statusFilter === 'active' && category.is_active) || 
       (statusFilter === 'inactive' && !category.is_active);
     return matchesSearch && matchesStatus;
   });
 
   return (
-    <VendorLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* En-tête */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Mes catégories</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Gestion des catégories</h1>
             <p className="mt-1 text-sm text-gray-500">
               Gérez vos catégories de produits
             </p>
@@ -181,55 +181,6 @@ export default function VendorCategoriesPage() {
           </div>
         </div>
 
-        {/* Statistiques rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total catégories</p>
-                <p className="text-2xl font-bold text-gray-900">{meta?.total ?? 0}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Catégories actives</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {Array.isArray(categories) ? categories.filter(c => c.is_active).length : 0}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Avec sous-catégories</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {Array.isArray(categories) ? categories.filter(c => (c.subcategories_count ?? 0) > 0).length : 0}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Tableau */}
         <CategoryTable
           categories={filteredCategories}
@@ -255,9 +206,8 @@ export default function VendorCategoriesPage() {
           category={selectedCategoryForSubcategories}
           isOpen={showSubcategoriesModal}
           onClose={handleCloseSubcategoriesModal}
-          useVendorService={true}
         />
       )}
-    </VendorLayout>
+    </AdminLayout>
   );
 }

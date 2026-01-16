@@ -3,18 +3,6 @@ import { X, Package, Clock, CheckCircle, Truck, XCircle, Eye } from 'lucide-reac
 import { useCurrency } from '../hooks/useCurrency';
 import { orderService, Order } from '../services/orderService';
 
-interface OrderItem {
-  id: number;
-  product_id: number;
-  quantity: number;
-  price: number;
-  product: {
-    id: number;
-    name: string;
-    images?: string[];
-  };
-}
-
 interface OrdersModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -40,9 +28,10 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
 
       const orders = await orderService.getOrders();
       setOrders(orders);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching orders:', err);
-      setError(err.message || 'Impossible de charger vos commandes');
+      const errorMessage = err instanceof Error ? err.message : 'Impossible de charger vos commandes';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -139,7 +128,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
           ) : orders.length === 0 ? (
             <div className="text-center py-12">
               <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg">Vous n'avez pas encore de commandes</p>
+              <p className="text-gray-600 text-lg">Vous n&apos;avez pas encore de commandes</p>
               <p className="text-gray-400 mt-2">Commencez vos achats dès maintenant !</p>
             </div>
           ) : selectedOrder ? (

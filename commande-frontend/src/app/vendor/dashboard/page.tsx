@@ -2,18 +2,64 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, Layers, ShoppingCart, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { Package, Layers, ShoppingCart, AlertCircle, Clock, CheckCircle } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+interface User {
+  name: string;
+  shop_name: string;
+  shop_description?: string;
+  phone?: string;
+  address?: string;
+  vendor_status: string;
+  rejection_reason?: string;
+}
+
 export default function VendorDashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const checkAuth = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Non autorisé');
+      }
+
+      const data = await response.json();
+
+      if (data.user.role !== 'vendor') {
+        router.push('/');
+        return;
+      }
+
+      setUser(data.user);
+    } catch (error) {
+      console.error('Erreur:', error);
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      router.push('/login');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
 
   const checkAuth = async () => {
     try {
@@ -73,10 +119,10 @@ export default function VendorDashboardPage() {
               <Clock className="w-10 h-10 text-yellow-600" />
             </div>
             <h1 className="text-2xl font-bold text-gray-800 mb-4">
-              Compte en attente d'approbation
+              Compte en attente d&apos;approbation
             </h1>
             <p className="text-gray-600 mb-6">
-              Votre demande de compte vendeur est en cours d'examen par notre équipe.
+              Votre demande de compte vendeur est en cours d&apos;examen par notre équipe.
               Vous recevrez une notification par email une fois votre compte approuvé.
             </p>
 
@@ -125,7 +171,7 @@ export default function VendorDashboardPage() {
             )}
 
             <p className="text-sm text-gray-500">
-              Pour plus d'informations, veuillez contacter notre support.
+              Pour plus d&apos;informations, veuillez contacter notre support.
             </p>
           </div>
         </div>
@@ -254,7 +300,7 @@ export default function VendorDashboardPage() {
             </li>
             <li className="flex items-start">
               <span className="text-blue-500 mr-2">•</span>
-              <span>Assurez-vous que vos produits respectent nos conditions d'utilisation</span>
+              <span>Assurez-vous que vos produits respectent nos conditions d&apos;utilisation</span>
             </li>
             <li className="flex items-start">
               <span className="text-blue-500 mr-2">•</span>

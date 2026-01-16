@@ -9,16 +9,19 @@ interface VendorLayoutProps {
   children: React.ReactNode;
 }
 
+interface User {
+  name: string;
+  shop_name?: string;
+  role: string;
+  vendor_status: string;
+}
+
 export default function VendorLayout({ children }: VendorLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
 
   const checkAuth = async () => {
     try {
@@ -63,6 +66,10 @@ export default function VendorLayout({ children }: VendorLayoutProps) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   const handleLogout = async () => {
     try {

@@ -24,12 +24,20 @@ interface Vendor {
   };
 }
 
+interface VendorStats {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+  suspended: number;
+}
+
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<VendorStats | null>(null);
   const [showReasonModal, setShowReasonModal] = useState(false);
   const [reasonAction, setReasonAction] = useState<{ type: 'reject' | 'suspend', vendorId: number } | null>(null);
   const [reason, setReason] = useState('');
@@ -37,6 +45,32 @@ export default function VendorsPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const loadVendors = async () => {
+    try {
+      setIsLoading(true);
+      const response = await adminService.getVendors(currentPage, 10, {
+        status: selectedStatus,
+        search: searchTerm
+      });
+      setVendors(response.data);
+      setTotalPages(response.meta.last_page);
+    } catch (error) {
+      console.error('Erreur lors du chargement des vendeurs:', error);
+      alert('Erreur lors du chargement des vendeurs');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadStats = async () => {
+    try {
+      const response = await adminService.getVendorStatistics();
+      setStats(response.data);
+    } catch (error) {
+      console.error('Erreur lors du chargement des statistiques:', error);
+    }
+  };
 
   useEffect(() => {
     loadVendors();
@@ -174,7 +208,7 @@ export default function VendorsPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">Gestion des Vendeurs</h1>
-        <p className="text-gray-600">Gérez les comptes vendeurs et leurs demandes d'inscription</p>
+        <p className="text-gray-600">Gérez les comptes vendeurs et leurs demandes d&apos;inscription</p>
       </div>
 
       {/* Statistiques */}

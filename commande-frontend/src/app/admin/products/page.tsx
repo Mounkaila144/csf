@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import VendorLayout from '../../../src/components/vendor/VendorLayout';
+import AdminLayout from '../../../src/components/admin/AdminLayout';
 import ProductTable from '../../../src/components/admin/ProductTable';
 import ProductForm from '../../../src/components/admin/ProductForm';
 import Pagination from '../../../src/components/admin/Pagination';
-import { vendorService } from '../../../src/services/vendorService';
+import { adminService } from '../../../src/services/adminService';
 import { AdminProduct, ProductFormData, AdminCategory, PaginationMeta, AdminFilters } from '../../../src/types';
 
-export default function VendorProductsPage() {
+export default function ProductsPage() {
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>({
@@ -40,7 +40,7 @@ export default function VendorProductsPage() {
 
   const loadCategories = async () => {
     try {
-      const response = await vendorService.getCategories(1, 100);
+      const response = await adminService.getCategories(1, 100);
       setCategories(response.data);
     } catch (error) {
       console.error('Erreur lors du chargement des catégories:', error);
@@ -50,7 +50,7 @@ export default function VendorProductsPage() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const response = await vendorService.getProducts(
+      const response = await adminService.getProducts(
         filters.page || 1,
         filters.per_page || 10,
         {
@@ -81,7 +81,7 @@ export default function VendorProductsPage() {
 
   const handleCreateProduct = async (data: ProductFormData) => {
     try {
-      await vendorService.createProduct(data);
+      await adminService.createProduct(data);
       setShowForm(false);
       setEditingProduct(undefined);
       await loadProducts();
@@ -93,9 +93,9 @@ export default function VendorProductsPage() {
 
   const handleUpdateProduct = async (data: ProductFormData) => {
     if (!editingProduct) return;
-
+    
     try {
-      await vendorService.updateProduct(editingProduct.id, data);
+      await adminService.updateProduct(editingProduct.id, data);
       setShowForm(false);
       setEditingProduct(undefined);
       await loadProducts();
@@ -107,7 +107,7 @@ export default function VendorProductsPage() {
 
   const handleDeleteProduct = async (id: number) => {
     try {
-      await vendorService.deleteProduct(id);
+      await adminService.deleteProduct(id);
       await loadProducts();
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
@@ -118,7 +118,7 @@ export default function VendorProductsPage() {
     try {
       const product = products.find(p => p.id === id);
       if (product) {
-        await vendorService.updateProduct(id, { ...product, status });
+        await adminService.updateProduct(id, { ...product, status });
         await loadProducts();
       }
     } catch (error) {
@@ -149,20 +149,20 @@ export default function VendorProductsPage() {
   };
 
   const handleCategoryFilterChange = (category_id: string) => {
-    setFilters(prev => ({
-      ...prev,
-      category_id: category_id ? parseInt(category_id) : undefined,
-      page: 1
+    setFilters(prev => ({ 
+      ...prev, 
+      category_id: category_id ? parseInt(category_id) : undefined, 
+      page: 1 
     }));
   };
 
   return (
-    <VendorLayout>
+    <AdminLayout>
       <div className="space-y-6">
         {/* En-tête */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Mes produits</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Gestion des produits</h1>
             <p className="mt-1 text-sm text-gray-500">
               Gérez votre catalogue de produits
             </p>
@@ -184,7 +184,6 @@ export default function VendorProductsPage() {
                 categories={categories}
                 onSubmit={editingProduct ? handleUpdateProduct : handleCreateProduct}
                 onCancel={handleCancel}
-                useVendorService={true}
               />
             </div>
           </div>
@@ -245,7 +244,7 @@ export default function VendorProductsPage() {
               </div>
             </div>
           </div>
-
+          
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
@@ -261,18 +260,18 @@ export default function VendorProductsPage() {
               </div>
             </div>
           </div>
-
+          
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
             <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Stock faible</p>
+                <p className="text-sm font-medium text-gray-600">Produits vedettes</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {Array.isArray(products) ? products.filter(p => p.stock <= 10).length : 0}
+                  0
                 </p>
               </div>
             </div>
@@ -296,6 +295,6 @@ export default function VendorProductsPage() {
           />
         )}
       </div>
-    </VendorLayout>
+    </AdminLayout>
   );
 }
