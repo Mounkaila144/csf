@@ -16,9 +16,23 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   size = 'md',
   className = ''
 }) => {
+  console.log('💰 [CurrencyDisplay] Props reçues:', { priceRMB, showBothCurrencies, primaryCurrency, size });
+  
   const { formatRMB, formatXOF, convertToXOF, loading } = useCurrency();
 
-  const priceXOF = convertToXOF(priceRMB);
+  // Validation du prix
+  const validPrice = priceRMB && !isNaN(priceRMB) && priceRMB > 0 ? priceRMB : 0;
+  
+  console.log('💵 [CurrencyDisplay] Prix validé:', validPrice);
+  
+  // Log pour déboguer les prix invalides
+  if (validPrice === 0 && priceRMB !== 0) {
+    console.warn('⚠️ [CurrencyDisplay] Prix invalide reçu:', priceRMB, 'Type:', typeof priceRMB);
+  }
+
+  const priceXOF = convertToXOF(validPrice);
+  
+  console.log('💱 [CurrencyDisplay] Prix converti en XOF:', priceXOF);
 
   // Tailles de texte selon la prop size
   const sizeClasses = {
@@ -42,6 +56,7 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   const currentSize = sizeClasses[size];
 
   if (loading) {
+    console.log('⏳ [CurrencyDisplay] En cours de chargement...');
     return (
       <div className={`animate-pulse ${className}`}>
         <div className="h-6 bg-gray-200 rounded w-24"></div>
@@ -49,11 +64,23 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
     );
   }
 
+  // Si le prix est invalide, afficher un message
+  if (validPrice === 0) {
+    console.warn('❌ [CurrencyDisplay] Affichage "Prix non disponible" car validPrice === 0');
+    return (
+      <div className={`${currentSize.primary} text-gray-400 ${className}`}>
+        Prix non disponible
+      </div>
+    );
+  }
+
+  console.log('✅ [CurrencyDisplay] Affichage du prix:', formatXOF(priceXOF), '≈', formatRMB(validPrice));
+
   if (!showBothCurrencies) {
     // Afficher seulement la devise primaire
     return (
       <div className={`${currentSize.primary} text-blue-600 ${className}`}>
-        {primaryCurrency === 'XOF' ? formatXOF(priceXOF) : formatRMB(priceRMB)}
+        {primaryCurrency === 'XOF' ? formatXOF(priceXOF) : formatRMB(validPrice)}
       </div>
     );
   }
@@ -69,14 +96,14 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
           </div>
           {/* Prix secondaire en RMB */}
           <div className={`${currentSize.secondary} text-gray-500`}>
-            ≈ {formatRMB(priceRMB)}
+            ≈ {formatRMB(validPrice)}
           </div>
         </>
       ) : (
         <>
           {/* Prix principal en RMB */}
           <div className={`${currentSize.primary} text-blue-600`}>
-            {formatRMB(priceRMB)}
+            {formatRMB(validPrice)}
           </div>
           {/* Prix secondaire en XOF */}
           <div className={`${currentSize.secondary} text-gray-500`}>

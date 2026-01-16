@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ImageGalleryProps {
@@ -12,8 +12,22 @@ interface ImageGalleryProps {
 const ImageGallery: React.FC<ImageGalleryProps> = ({ images, alt, className = '' }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Dédupliquer les images pour éviter les doublons
+  const uniqueImages = React.useMemo(() => {
+    if (!images || images.length === 0) return [];
+    // Utiliser un Set pour éliminer les doublons
+    return Array.from(new Set(images));
+  }, [images]);
+
+  // Réinitialiser l'index si les images changent
+  useEffect(() => {
+    if (currentIndex >= uniqueImages.length) {
+      setCurrentIndex(0);
+    }
+  }, [uniqueImages, currentIndex]);
+
   // Si pas d'images, afficher une image placeholder
-  if (!images || images.length === 0) {
+  if (!uniqueImages || uniqueImages.length === 0) {
     return (
       <div className={`relative ${className}`}>
         <img
@@ -26,11 +40,11 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, alt, className = ''
   }
 
   // Si une seule image, afficher juste l'image
-  if (images.length === 1) {
+  if (uniqueImages.length === 1) {
     return (
       <div className={`relative ${className}`}>
         <img
-          src={images[0]}
+          src={uniqueImages[0]}
           alt={alt}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
@@ -41,12 +55,12 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, alt, className = ''
   // Si plusieurs images, afficher un carousel
   const goToPrevious = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    setCurrentIndex((prev) => (prev === 0 ? uniqueImages.length - 1 : prev - 1));
   };
 
   const goToNext = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    setCurrentIndex((prev) => (prev === uniqueImages.length - 1 ? 0 : prev + 1));
   };
 
   const goToImage = (index: number, e: React.MouseEvent) => {
@@ -59,13 +73,13 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, alt, className = ''
       {/* Image principale */}
       <div className="relative overflow-hidden h-48">
         <img
-          src={images[currentIndex]}
+          src={uniqueImages[currentIndex]}
           alt={`${alt} - Image ${currentIndex + 1}`}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
 
         {/* Boutons de navigation */}
-        {images.length > 1 && (
+        {uniqueImages.length > 1 && (
           <>
             {/* Bouton précédent */}
             <button
@@ -88,17 +102,17 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, alt, className = ''
         )}
 
         {/* Compteur d'images */}
-        {images.length > 1 && (
+        {uniqueImages.length > 1 && (
           <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-            {currentIndex + 1} / {images.length}
+            {currentIndex + 1} / {uniqueImages.length}
           </div>
         )}
       </div>
 
       {/* Indicateurs (dots) */}
-      {images.length > 1 && images.length <= 5 && (
+      {uniqueImages.length > 1 && uniqueImages.length <= 5 && (
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-          {images.map((_, index) => (
+          {uniqueImages.map((_, index) => (
             <button
               key={index}
               onClick={(e) => goToImage(index, e)}

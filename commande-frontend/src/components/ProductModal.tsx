@@ -25,7 +25,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
-  const images = product.images && product.images.length > 0 ? product.images : [product.image];
+  // Dédupliquer les images pour éviter les doublons
+  const images = React.useMemo(() => {
+    const rawImages = product.images && product.images.length > 0 ? product.images : [product.image];
+    // Utiliser un Set pour éliminer les doublons
+    return Array.from(new Set(rawImages));
+  }, [product.images, product.image]);
 
   useEffect(() => {
     if (isOpen) {
@@ -244,12 +249,24 @@ const ProductModal: React.FC<ProductModalProps> = ({
             </div>
 
             {/* Description (si disponible) */}
-            <div className="prose prose-sm max-w-none">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Description</h3>
-              <p className="text-gray-600 leading-relaxed">
-                {product.name} - Un produit de qualité supérieure sélectionné avec soin pour vous offrir la meilleure expérience.
-              </p>
-            </div>
+            {product.description && (
+              <div className="prose prose-sm max-w-none">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Description</h3>
+                <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+                  {product.description}
+                </p>
+              </div>
+            )}
+
+            {/* Stock disponible */}
+            {product.stock !== undefined && (
+              <div className="flex items-center gap-2">
+                <Package size={18} className="text-gray-600" />
+                <span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {product.stock > 0 ? `${product.stock} en stock` : 'Rupture de stock'}
+                </span>
+              </div>
+            )}
 
             {/* Sélecteur de quantité */}
             <div>

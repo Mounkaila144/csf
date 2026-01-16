@@ -224,15 +224,52 @@ class PublicService {
   
   // Convertir un produit de l'API vers le format attendu par les composants existants
   convertToFrontendProduct(apiProduct: PublicProduct): Product {
+    console.log('🔄 [publicService] Conversion du produit:', apiProduct.id, apiProduct.name);
+    console.log('💰 [publicService] Prix brut reçu:', apiProduct.price, 'Type:', typeof apiProduct.price);
+    
     const status = apiProduct.status || [];
-    const fullImageUrls = apiProduct.images && apiProduct.images.length > 0
-      ? apiProduct.images.map(img => getFullImageUrl(img))
+    
+    // Dédupliquer les images (enlever les doublons)
+    const rawImages = apiProduct.images && apiProduct.images.length > 0
+      ? apiProduct.images
       : [];
+    
+    // Utiliser un Set pour éliminer les doublons, puis reconvertir en tableau
+    const uniqueImages = Array.from(new Set(rawImages));
+    
+    const fullImageUrls = uniqueImages.map(img => getFullImageUrl(img));
 
-    return {
+    // Convertir le prix avec validation
+    let price = 0;
+    if (apiProduct.price !== undefined && apiProduct.price !== null) {
+      console.log('💵 [publicService] Prix avant conversion:', apiProduct.price);
+      const parsedPrice = parseFloat(apiProduct.price.toString());
+      console.log('💵 [publicService] Prix après parseFloat:', parsedPrice);
+      
+      // ⚠️ CORRECTION: Si le prix est très petit (< 1), c'est probablement en centimes
+      // On le multiplie par 100 pour avoir le prix en yuan
+      if (parsedPrice > 0 && parsedPrice < 1) {
+        console.warn('⚠️ [publicService] Prix en centimes détecté, conversion en yuan:', parsedPrice, '→', parsedPrice * 100);
+        price = parsedPrice * 100;
+      } else {
+        price = isNaN(parsedPrice) ? 0 : parsedPrice;
+      }
+      
+      console.log('💵 [publicService] Prix final:', price);
+    } else {
+      console.warn('⚠️ [publicService] Prix undefined ou null pour le produit:', apiProduct.id, apiProduct.name);
+    }
+
+    // Log pour déboguer les prix manquants
+    if (price === 0) {
+      console.warn(`⚠️ [publicService] Produit ${apiProduct.id} (${apiProduct.name}) a un prix invalide:`, apiProduct.price);
+    }
+
+    const convertedProduct = {
       id: apiProduct.id.toString(),
       name: apiProduct.name,
-      price: parseFloat(apiProduct.price.toString()),
+      description: apiProduct.description,
+      price: price,
       originalPrice: undefined, // Pas encore implémenté dans l'API
       image: fullImageUrls.length > 0 ? fullImageUrls[0] : '/placeholder-product.jpg',
       images: fullImageUrls.length > 0 ? fullImageUrls : undefined,
@@ -246,8 +283,13 @@ class PublicService {
       isPromo: status.includes('on_sale'),
       isBestSeller: status.includes('best_seller'),
       freeShipping: false, // À implémenter dans l'API
-      status: status, // Ajout du champ status
+      stock: apiProduct.stock,
     };
+
+    console.log('✅ [publicService] Produit converti:', convertedProduct);
+    console.log('💰 [publicService] Prix dans le produit converti:', convertedProduct.price);
+
+    return convertedProduct;
   }
 
   // Convertir une catégorie de l'API vers le format attendu par les composants existants

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, ShoppingCart, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Product, ProductStatus } from '../types';
 import { PRODUCT_STATUSES, getStatusInfo } from '../constants/productStatus';
 import { publicService, PublicProduct } from '../services/publicService';
-import { useCart } from '../contexts/CartContext';
+import ProductCard from './ProductCard';
 
 interface StatusSectionsProps {
   onToggleFavorite: (productId: string) => void;
@@ -14,7 +14,6 @@ const StatusSections: React.FC<StatusSectionsProps> = ({
   onToggleFavorite,
   favorites
 }) => {
-  const { addItem } = useCart();
   const [productsData, setProductsData] = useState<{
     [key in ProductStatus]: Product[];
   }>({
@@ -35,9 +34,13 @@ const StatusSections: React.FC<StatusSectionsProps> = ({
   }, []);
 
   const loadProductsByStatus = async () => {
+    console.log('🔍 [StatusSections] Début du chargement des produits par statut');
+    
     try {
       const promises = PRODUCT_STATUSES.map(async (status) => {
         try {
+          console.log(`📡 [StatusSections] Chargement des produits ${status.label}...`);
+          
           let response;
           switch (status.value) {
             case 'best_seller':
@@ -53,18 +56,34 @@ const StatusSections: React.FC<StatusSectionsProps> = ({
               throw new Error(`Statut non supporté: ${status.value}`);
           }
           
+          console.log(`✅ [StatusSections] Réponse API pour ${status.label}:`, response);
+          console.log(`📦 [StatusSections] Nombre de produits reçus pour ${status.label}:`, response.data?.length || 0);
+          
+          if (response.data && response.data.length > 0) {
+            console.log(`🔍 [StatusSections] Premier produit brut pour ${status.label}:`, response.data[0]);
+            console.log(`💰 [StatusSections] Prix du premier produit pour ${status.label}:`, response.data[0]?.price);
+          }
+          
           const convertedProducts = response.data.map((product: PublicProduct) =>
             publicService.convertToFrontendProduct(product)
           );
           
+          console.log(`🔄 [StatusSections] Produits convertis pour ${status.label}:`, convertedProducts);
+          
+          if (convertedProducts.length > 0) {
+            console.log(`💵 [StatusSections] Prix du premier produit converti pour ${status.label}:`, convertedProducts[0]?.price);
+          }
+          
           return { status: status.value, products: convertedProducts };
         } catch (error) {
-          console.error(`Erreur lors du chargement des produits ${status.label}:`, error);
+          console.error(`❌ [StatusSections] Erreur lors du chargement des produits ${status.label}:`, error);
           return { status: status.value, products: [] };
         }
       });
 
       const results = await Promise.all(promises);
+      
+      console.log('📊 [StatusSections] Résultats finaux:', results);
       
       const newProductsData = { ...productsData };
       const newLoading = { ...loading };
@@ -72,12 +91,19 @@ const StatusSections: React.FC<StatusSectionsProps> = ({
       results.forEach(({ status, products }) => {
         newProductsData[status] = products.slice(0, 8); // Limiter à 8 produits par section
         newLoading[status] = false;
+        
+        console.log(`✂️ [StatusSections] Produits pour ${status} après slice:`, newProductsData[status].length);
+        if (newProductsData[status].length > 0) {
+          console.log(`💰 [StatusSections] Prix du premier produit final pour ${status}:`, newProductsData[status][0]?.price);
+        }
       });
 
       setProductsData(newProductsData);
       setLoading(newLoading);
+      
+      console.log('✅ [StatusSections] Chargement terminé, state mis à jour');
     } catch (error) {
-      console.error('Erreur lors du chargement des produits par statut:', error);
+      console.error('❌ [StatusSections] Erreur globale lors du chargement des produits par statut:', error);
       // Set all loading to false in case of global error
       setLoading({
         best_seller: false,
@@ -86,81 +112,6 @@ const StatusSections: React.FC<StatusSectionsProps> = ({
       });
     }
   };
-
-  const ProductCard: React.FC<{ product: Product }> = ({ product }) => (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group">
-      <div className="relative">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-40 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        <button
-          onClick={() => onToggleFavorite(product.id)}
-          className={`absolute top-1 sm:top-2 right-1 sm:right-2 p-1.5 sm:p-2 rounded-full shadow-md transition-colors ${
-            favorites.includes(product.id)
-              ? 'bg-red-500 text-white'
-              : 'bg-white text-gray-600 hover:text-red-500'
-          }`}
-        >
-          <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${favorites.includes(product.id) ? 'fill-current' : ''}`} />
-        </button>
-        {product.isPromo && (
-          <div className="absolute top-1 sm:top-2 left-1 sm:left-2 bg-red-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs font-bold rounded">
-            PROMO
-          </div>
-        )}
-        {product.isNew && (
-          <div className="absolute top-1 sm:top-2 left-1 sm:left-2 bg-green-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs font-bold rounded">
-            NOUVEAU
-          </div>
-        )}
-      </div>
-      
-      <div className="p-3 sm:p-4">
-        <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-2 line-clamp-2">
-          {product.name}
-        </h3>
-        
-        <div className="flex items-center mb-2">
-          <div className="flex text-yellow-400">
-            {[...Array(5)].map((_, i) => (
-              <span key={i} className={`text-xs sm:text-sm ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`}>
-                ★
-              </span>
-            ))}
-          </div>
-          <span className="text-xs sm:text-sm text-gray-500 ml-2">({product.reviews})</span>
-        </div>
-        
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2">
-            <span className="text-base sm:text-lg font-bold text-blue-600">
-              {product.price.toFixed(2)} CFA
-            </span>
-            {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-xs sm:text-sm text-gray-500 line-through">
-                {product.originalPrice.toFixed(2)} CFA
-              </span>
-            )}
-          </div>
-        </div>
-        
-        <button
-          onClick={() => addItem({
-            id: parseInt(product.id),
-            name: product.name,
-            price: product.price,
-            image: product.image,
-          })}
-          className="w-full bg-blue-600 text-white py-2 px-3 sm:px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center space-x-1 sm:space-x-2 text-sm sm:text-base"
-        >
-          <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span className="truncate">Ajouter au panier</span>
-        </button>
-      </div>
-    </div>
-  );
 
   const StatusSection: React.FC<{ status: ProductStatus }> = ({ status }) => {
     const statusInfo = getStatusInfo(status);
@@ -196,7 +147,12 @@ const StatusSections: React.FC<StatusSectionsProps> = ({
         ) : products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                onToggleFavorite={onToggleFavorite}
+                isFavorite={favorites.includes(product.id)}
+              />
             ))}
           </div>
         ) : (

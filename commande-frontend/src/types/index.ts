@@ -12,6 +12,7 @@ export interface ProductStatusInfo {
 export interface Product {
   id: string;
   name: string;
+  description?: string; // Description du produit
   price: number;
   originalPrice?: number;
   image: string; // Image principale (pour compatibilité)
@@ -26,6 +27,7 @@ export interface Product {
   isPromo?: boolean;
   isBestSeller?: boolean;
   freeShipping?: boolean;
+  stock?: number; // Stock disponible
 }
 
 export interface Category {

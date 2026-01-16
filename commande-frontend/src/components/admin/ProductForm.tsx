@@ -174,10 +174,8 @@ export default function ProductForm({
       images
     }));
 
-    // Si on a des fichiers (mode preview), les stocker pour upload ultérieur
-    if (files && files.length > 0) {
-      setPendingFiles(prev => [...prev, ...files]);
-    }
+    // Ne PAS stocker les fichiers ici car handleFilesReady le fait déjà
+    // Cela évite la duplication des fichiers
   };
 
   const handleImagesUpload = async (files: File[]): Promise<string[]> => {
@@ -192,7 +190,7 @@ export default function ProductForm({
   };
 
   const handleFilesReady = (files: File[]) => {
-    // Stocker les fichiers compressés pour upload ultérieur
+    // Stocker les fichiers compressés pour upload ultérieur (mode création uniquement)
     setPendingFiles(prev => [...prev, ...files]);
   };
 

@@ -17,6 +17,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onToggleFavorite,
   isFavorite = false
 }) => {
+  console.log('🎴 [ProductCard] Rendu de la carte pour:', product.name);
+  console.log('💰 [ProductCard] Prix du produit:', product.price, 'Type:', typeof product.price);
+  
   const { addItem } = useCart();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
