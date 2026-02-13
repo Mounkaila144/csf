@@ -13,6 +13,8 @@ class Order extends Model
         'user_id',
         'total_amount',
         'status',
+        'payment_status',
+        'payment_id',
         'shipping_address',
         'billing_address',
         'phone',
@@ -31,5 +33,20 @@ class Order extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class);
+    }
+
+    public function paymentCodes()
+    {
+        return $this->hasMany(PaymentCode::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

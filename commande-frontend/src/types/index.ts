@@ -51,10 +51,19 @@ export interface AdminProduct {
   is_active: boolean;
   stock: number;
   status?: ProductStatus[];
+  supplier_company?: string;
+  supplier_phone?: string;
+  supplier_address?: string;
+  weight_kg?: number;
+  length_cm?: number;
+  width_cm?: number;
+  height_cm?: number;
   created_at: string;
   updated_at: string;
   category?: AdminCategory;
   subcategory?: AdminSubcategory;
+  original_price?: number;
+  is_featured?: boolean;
 }
 
 export interface AdminCategory {
@@ -108,6 +117,127 @@ export interface ProductFormData {
   is_active: boolean;
   stock: number;
   status?: ProductStatus[];
+  supplier_company?: string;
+  supplier_phone?: string;
+  supplier_address?: string;
+  weight_kg?: number;
+  length_cm?: number;
+  width_cm?: number;
+  height_cm?: number;
+}
+
+// Types pour le système de paiement par partenaires
+export interface City {
+  id: number;
+  name: string;
+  code: string;
+  country: string;
+  is_active: boolean;
+  neighborhoods_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Neighborhood {
+  id: number;
+  name: string;
+  city_id: number;
+  is_active: boolean;
+  city?: City;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PartnerData {
+  id: number;
+  user_id: number;
+  business_name: string;
+  business_phone: string;
+  business_address: string;
+  city_id: number;
+  neighborhood_id: number;
+  status: 'pending' | 'approved' | 'rejected' | 'suspended';
+  commission_rate: number;
+  approved_at?: string;
+  rejection_reason?: string;
+  city?: City;
+  neighborhood?: Neighborhood;
+  user?: { id: number; name: string; email: string };
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaymentCode {
+  id: number;
+  code: string;
+  partner_id: number;
+  order_id: number;
+  amount: number;
+  status: 'pending' | 'validated' | 'expired' | 'cancelled';
+  expires_at: string;
+  validated_at?: string;
+  partner?: PartnerData;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Payment {
+  id: number;
+  order_id: number;
+  partner_id: number;
+  payment_code_id: number;
+  client_id: number;
+  amount: number;
+  partner_commission: number;
+  status: string;
+  order?: { id: number; total_amount: number };
+  partner?: PartnerData;
+  created_at: string;
+  updated_at: string;
+}
+
+// Types pour le système de devis
+export interface DeliveryZone {
+  id: number;
+  name: string;
+  city_id: number;
+  base_price: number;
+  price_per_kg: number;
+  price_per_m3: number;
+  max_weight_kg: number;
+  max_volume_m3: number;
+  is_active: boolean;
+  city?: City;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuoteItem {
+  product_id: number;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  weight_kg?: number;
+  volume_m3?: number;
+}
+
+export interface Quote {
+  id: number;
+  reference: string;
+  user_id?: number;
+  delivery_zone_id: number;
+  items: QuoteItem[];
+  subtotal_products: number;
+  total_weight_kg: number;
+  total_volume_m3: number;
+  delivery_cost: number;
+  total_amount: number;
+  status: 'draft' | 'sent' | 'accepted' | 'expired';
+  expires_at: string;
+  notes?: string;
+  delivery_zone?: DeliveryZone;
+  created_at: string;
+  updated_at: string;
 }
 
 // Types pour les filtres et recherche

@@ -1,4 +1,4 @@
-import { ProductFormData, AdminProduct, AdminCategory, AdminSubcategory, SubcategoryFormData, CategoryFormData } from '../types';
+import { ProductFormData, AdminProduct, AdminCategory, AdminSubcategory, SubcategoryFormData, CategoryFormData, City, Neighborhood, PartnerData, Payment, DeliveryZone } from '../types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ;
@@ -379,6 +379,152 @@ class AdminService {
     });
 
     return this.handleResponse<ApiResponse<VendorStatistics>>(response);
+  }
+  // ==================== CITIES ====================
+
+  async getCities(page = 1, perPage = 15, filters?: { search?: string }): Promise<PaginatedResponse<City>> {
+    let url = `${API_BASE_URL}/admin/cities?page=${page}&per_page=${perPage}`;
+    if (filters?.search) url += `&search=${encodeURIComponent(filters.search)}`;
+    const response = await fetch(url, { method: 'GET', headers: this.getHeaders() });
+    return this.handleResponse<PaginatedResponse<City>>(response);
+  }
+
+  async createCity(data: { name: string; code: string; country?: string; is_active?: boolean }): Promise<ApiResponse<City>> {
+    const response = await fetch(`${API_BASE_URL}/admin/cities`, {
+      method: 'POST', headers: this.getHeaders(), body: JSON.stringify(data),
+    });
+    return this.handleResponse<ApiResponse<City>>(response);
+  }
+
+  async updateCity(id: number, data: { name: string; code: string; country?: string; is_active?: boolean }): Promise<ApiResponse<City>> {
+    const response = await fetch(`${API_BASE_URL}/admin/cities/${id}`, {
+      method: 'PUT', headers: this.getHeaders(), body: JSON.stringify(data),
+    });
+    return this.handleResponse<ApiResponse<City>>(response);
+  }
+
+  async deleteCity(id: number): Promise<ApiResponse<null>> {
+    const response = await fetch(`${API_BASE_URL}/admin/cities/${id}`, {
+      method: 'DELETE', headers: this.getHeaders(),
+    });
+    return this.handleResponse<ApiResponse<null>>(response);
+  }
+
+  // ==================== NEIGHBORHOODS ====================
+
+  async getNeighborhoods(page = 1, perPage = 15, cityId?: number): Promise<PaginatedResponse<Neighborhood>> {
+    let url = `${API_BASE_URL}/admin/neighborhoods?page=${page}&per_page=${perPage}`;
+    if (cityId) url += `&city_id=${cityId}`;
+    const response = await fetch(url, { method: 'GET', headers: this.getHeaders() });
+    return this.handleResponse<PaginatedResponse<Neighborhood>>(response);
+  }
+
+  async createNeighborhood(data: { name: string; city_id: number; is_active?: boolean }): Promise<ApiResponse<Neighborhood>> {
+    const response = await fetch(`${API_BASE_URL}/admin/neighborhoods`, {
+      method: 'POST', headers: this.getHeaders(), body: JSON.stringify(data),
+    });
+    return this.handleResponse<ApiResponse<Neighborhood>>(response);
+  }
+
+  async updateNeighborhood(id: number, data: { name: string; city_id: number; is_active?: boolean }): Promise<ApiResponse<Neighborhood>> {
+    const response = await fetch(`${API_BASE_URL}/admin/neighborhoods/${id}`, {
+      method: 'PUT', headers: this.getHeaders(), body: JSON.stringify(data),
+    });
+    return this.handleResponse<ApiResponse<Neighborhood>>(response);
+  }
+
+  async deleteNeighborhood(id: number): Promise<ApiResponse<null>> {
+    const response = await fetch(`${API_BASE_URL}/admin/neighborhoods/${id}`, {
+      method: 'DELETE', headers: this.getHeaders(),
+    });
+    return this.handleResponse<ApiResponse<null>>(response);
+  }
+
+  // ==================== PARTNERS ====================
+
+  async getPartners(page = 1, perPage = 15, filters?: { status?: string; search?: string }): Promise<PaginatedResponse<PartnerData>> {
+    let url = `${API_BASE_URL}/admin/partners?page=${page}&per_page=${perPage}`;
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) url += `&${key}=${encodeURIComponent(value)}`;
+      });
+    }
+    const response = await fetch(url, { method: 'GET', headers: this.getHeaders() });
+    return this.handleResponse<PaginatedResponse<PartnerData>>(response);
+  }
+
+  async approvePartner(id: number): Promise<ApiResponse<PartnerData>> {
+    const response = await fetch(`${API_BASE_URL}/admin/partners/${id}/approve`, {
+      method: 'POST', headers: this.getHeaders(),
+    });
+    return this.handleResponse<ApiResponse<PartnerData>>(response);
+  }
+
+  async rejectPartner(id: number, reason: string): Promise<ApiResponse<PartnerData>> {
+    const response = await fetch(`${API_BASE_URL}/admin/partners/${id}/reject`, {
+      method: 'POST', headers: this.getHeaders(), body: JSON.stringify({ reason }),
+    });
+    return this.handleResponse<ApiResponse<PartnerData>>(response);
+  }
+
+  async suspendPartner(id: number, reason: string): Promise<ApiResponse<PartnerData>> {
+    const response = await fetch(`${API_BASE_URL}/admin/partners/${id}/suspend`, {
+      method: 'POST', headers: this.getHeaders(), body: JSON.stringify({ reason }),
+    });
+    return this.handleResponse<ApiResponse<PartnerData>>(response);
+  }
+
+  async reactivatePartner(id: number): Promise<ApiResponse<PartnerData>> {
+    const response = await fetch(`${API_BASE_URL}/admin/partners/${id}/reactivate`, {
+      method: 'POST', headers: this.getHeaders(),
+    });
+    return this.handleResponse<ApiResponse<PartnerData>>(response);
+  }
+
+  async getPartnerStatistics(): Promise<ApiResponse<{ total: number; pending: number; approved: number; rejected: number; suspended: number }>> {
+    const response = await fetch(`${API_BASE_URL}/admin/partners/statistics`, {
+      method: 'GET', headers: this.getHeaders(),
+    });
+    return this.handleResponse(response);
+  }
+
+  // ==================== PAYMENTS ====================
+
+  async getPayments(page = 1, perPage = 15, filters?: { status?: string }): Promise<PaginatedResponse<Payment>> {
+    let url = `${API_BASE_URL}/admin/payments?page=${page}&per_page=${perPage}`;
+    if (filters?.status) url += `&status=${encodeURIComponent(filters.status)}`;
+    const response = await fetch(url, { method: 'GET', headers: this.getHeaders() });
+    return this.handleResponse<PaginatedResponse<Payment>>(response);
+  }
+
+  // ==================== DELIVERY ZONES ====================
+
+  async getDeliveryZones(page = 1, perPage = 15, cityId?: number): Promise<PaginatedResponse<DeliveryZone>> {
+    let url = `${API_BASE_URL}/admin/delivery-zones?page=${page}&per_page=${perPage}`;
+    if (cityId) url += `&city_id=${cityId}`;
+    const response = await fetch(url, { method: 'GET', headers: this.getHeaders() });
+    return this.handleResponse<PaginatedResponse<DeliveryZone>>(response);
+  }
+
+  async createDeliveryZone(data: Partial<DeliveryZone>): Promise<ApiResponse<DeliveryZone>> {
+    const response = await fetch(`${API_BASE_URL}/admin/delivery-zones`, {
+      method: 'POST', headers: this.getHeaders(), body: JSON.stringify(data),
+    });
+    return this.handleResponse<ApiResponse<DeliveryZone>>(response);
+  }
+
+  async updateDeliveryZone(id: number, data: Partial<DeliveryZone>): Promise<ApiResponse<DeliveryZone>> {
+    const response = await fetch(`${API_BASE_URL}/admin/delivery-zones/${id}`, {
+      method: 'PUT', headers: this.getHeaders(), body: JSON.stringify(data),
+    });
+    return this.handleResponse<ApiResponse<DeliveryZone>>(response);
+  }
+
+  async deleteDeliveryZone(id: number): Promise<ApiResponse<null>> {
+    const response = await fetch(`${API_BASE_URL}/admin/delivery-zones/${id}`, {
+      method: 'DELETE', headers: this.getHeaders(),
+    });
+    return this.handleResponse<ApiResponse<null>>(response);
   }
 }
 

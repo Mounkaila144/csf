@@ -21,7 +21,7 @@ class ProductController extends Controller
     /**
      * Enrichir un produit avec les informations de prix multi-devises
      */
-    private function enrichProductWithCurrency($product)
+    private function enrichProductWithCurrency($product, $hideSupplier = false)
     {
         if (is_array($product)) {
             $product = (object) $product;
@@ -36,16 +36,21 @@ class ProductController extends Controller
         $enriched['price_rmb'] = $product->price;
         $enriched['price_xof'] = $priceInfo['xof']['amount'];
 
+        // Cacher les champs fournisseur pour les routes non-admin
+        if ($hideSupplier) {
+            unset($enriched['supplier_company'], $enriched['supplier_phone'], $enriched['supplier_address']);
+        }
+
         return $enriched;
     }
 
     /**
      * Enrichir une collection de produits
      */
-    private function enrichProductsWithCurrency($products)
+    private function enrichProductsWithCurrency($products, $hideSupplier = false)
     {
-        return array_map(function($product) {
-            return $this->enrichProductWithCurrency($product);
+        return array_map(function($product) use ($hideSupplier) {
+            return $this->enrichProductWithCurrency($product, $hideSupplier);
         }, $products);
     }
 
@@ -124,8 +129,11 @@ class ProductController extends Controller
 
         $products = $query->paginate($request->get('per_page', 15));
 
+        // Cacher les champs fournisseur pour les routes non-admin
+        $hideSupplier = !str_contains($request->getPathInfo(), '/admin/');
+
         // Enrichir les produits avec les informations de devise
-        $enrichedProducts = $this->enrichProductsWithCurrency($products->items());
+        $enrichedProducts = $this->enrichProductsWithCurrency($products->items(), $hideSupplier);
 
         return response()->json([
             'status' => 'success',
@@ -156,7 +164,14 @@ class ProductController extends Controller
             'images.*' => 'string',
             'is_active' => 'boolean',
             'status' => 'nullable|array',
-            'status.*' => 'in:best_seller,new,on_sale'
+            'status.*' => 'in:best_seller,new,on_sale',
+            'supplier_company' => 'nullable|string|max:255',
+            'supplier_phone' => 'nullable|string|max:50',
+            'supplier_address' => 'nullable|string|max:500',
+            'weight_kg' => 'nullable|numeric|min:0',
+            'length_cm' => 'nullable|numeric|min:0',
+            'width_cm' => 'nullable|numeric|min:0',
+            'height_cm' => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -167,7 +182,7 @@ class ProductController extends Controller
             ], 400);
         }
 
-        $productData = $request->only(['name', 'description', 'price', 'stock', 'category_id', 'subcategory_id', 'is_active', 'images', 'status']);
+        $productData = $request->only(['name', 'description', 'price', 'stock', 'category_id', 'subcategory_id', 'is_active', 'images', 'status', 'supplier_company', 'supplier_phone', 'supplier_address', 'weight_kg', 'length_cm', 'width_cm', 'height_cm']);
 
         // Si c'est un vendeur, ajouter automatiquement vendor_id
         if (auth()->user()->isVendor()) {
@@ -184,10 +199,10 @@ class ProductController extends Controller
         ], 201);
     }
 
-    public function show(Product $product)
+    public function show(Request $request, Product $product)
     {
         // Vérifier que le vendeur peut voir ce produit
-        if (auth()->user()->isVendor() && $product->vendor_id !== auth()->id()) {
+        if (auth()->check() && auth()->user()->isVendor() && $product->vendor_id !== auth()->id()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Unauthorized to view this product'
@@ -195,6 +210,11 @@ class ProductController extends Controller
         }
 
         $product->load(['category', 'subcategory']);
+
+        // Cacher les champs fournisseur pour les routes non-admin
+        if (!str_contains($request->getPathInfo(), '/admin/')) {
+            $product->makeHidden(['supplier_company', 'supplier_phone', 'supplier_address']);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -225,7 +245,14 @@ class ProductController extends Controller
             'status' => 'nullable|array',
             'status.*' => 'in:best_seller,new,on_sale',
             'remove_images' => 'nullable|array',
-            'remove_images.*' => 'string'
+            'remove_images.*' => 'string',
+            'supplier_company' => 'nullable|string|max:255',
+            'supplier_phone' => 'nullable|string|max:50',
+            'supplier_address' => 'nullable|string|max:500',
+            'weight_kg' => 'nullable|numeric|min:0',
+            'length_cm' => 'nullable|numeric|min:0',
+            'width_cm' => 'nullable|numeric|min:0',
+            'height_cm' => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -236,7 +263,7 @@ class ProductController extends Controller
             ], 400);
         }
 
-        $productData = $request->only(['name', 'description', 'price', 'stock', 'category_id', 'subcategory_id', 'is_active', 'images', 'status']);
+        $productData = $request->only(['name', 'description', 'price', 'stock', 'category_id', 'subcategory_id', 'is_active', 'images', 'status', 'supplier_company', 'supplier_phone', 'supplier_address', 'weight_kg', 'length_cm', 'width_cm', 'height_cm']);
 
         $product->update($productData);
         $product->load(['category', 'subcategory']);

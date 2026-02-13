@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Package, Clock, CheckCircle, Truck, XCircle, Eye } from 'lucide-react';
+import { X, Package, Clock, CheckCircle, Truck, XCircle, Eye, CreditCard } from 'lucide-react';
 import { useCurrency } from '../hooks/useCurrency';
 import { orderService, Order } from '../services/orderService';
+import PaymentCodeInput from './PaymentCodeInput';
 
 interface OrdersModalProps {
   isOpen: boolean;
@@ -82,6 +83,25 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
           borderColor: 'border-gray-200'
         };
     }
+  };
+
+  const getPaymentStatusInfo = (status?: Order['payment_status']) => {
+    switch (status) {
+      case 'paid':
+        return { label: 'Payé', color: 'text-green-700 bg-green-100' };
+      case 'pending_validation':
+        return { label: 'En cours de validation', color: 'text-yellow-700 bg-yellow-100' };
+      case 'refunded':
+        return { label: 'Remboursé', color: 'text-blue-700 bg-blue-100' };
+      case 'unpaid':
+      default:
+        return { label: 'Non payé', color: 'text-red-700 bg-red-100' };
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    fetchOrders();
+    setSelectedOrder(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -224,6 +244,26 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
                     </span>
                   </div>
                 </div>
+
+                {/* Statut du paiement */}
+                <div className="bg-white p-4 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                      <CreditCard className="w-5 h-5" />
+                      Paiement
+                    </h4>
+                    <span className={`text-sm px-3 py-1 rounded-full font-medium ${getPaymentStatusInfo(selectedOrder.payment_status).color}`}>
+                      {getPaymentStatusInfo(selectedOrder.payment_status).label}
+                    </span>
+                  </div>
+
+                  {(!selectedOrder.payment_status || selectedOrder.payment_status === 'unpaid') && (
+                    <PaymentCodeInput
+                      orderId={selectedOrder.id}
+                      onSuccess={handlePaymentSuccess}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           ) : (
@@ -246,9 +286,14 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
                           {formatDate(order.created_at)}
                         </p>
                       </div>
-                      <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${statusInfo.color}`}>
-                        {React.createElement(statusInfo.icon, { className: 'w-4 h-4' })}
-                        <span className="text-sm font-semibold">{statusInfo.label}</span>
+                      <div className="flex flex-col items-end gap-1">
+                        <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${statusInfo.color}`}>
+                          {React.createElement(statusInfo.icon, { className: 'w-4 h-4' })}
+                          <span className="text-sm font-semibold">{statusInfo.label}</span>
+                        </div>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getPaymentStatusInfo(order.payment_status).color}`}>
+                          {getPaymentStatusInfo(order.payment_status).label}
+                        </span>
                       </div>
                     </div>
 

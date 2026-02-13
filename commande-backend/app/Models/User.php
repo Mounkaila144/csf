@@ -80,6 +80,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->role === 'vendor';
     }
 
+    public function isPartner()
+    {
+        return $this->role === 'partner';
+    }
+
     public function isApprovedVendor()
     {
         return $this->isVendor() && $this->vendor_status === 'approved';
@@ -124,5 +129,15 @@ class User extends Authenticatable implements JWTSubject
     public function approvedVendors()
     {
         return $this->hasMany(User::class, 'approved_by');
+    }
+
+    public function partner()
+    {
+        return $this->hasOne(Partner::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import OrderModal from './OrderModal';
+import DeliveryQuote from './DeliveryQuote';
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface CartSidebarProps {
 const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
   const { items, totalAmount, updateQuantity, removeItem } = useCart();
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [deliveryCost, setDeliveryCost] = useState(0);
 
   if (!isOpen) return null;
 
@@ -95,15 +97,33 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
           {/* Footer */}
           {items.length > 0 && (
             <div className="border-t p-4 space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold">Total:</span>
-                <span className="text-lg font-bold text-custom-blue">
-                  {totalAmount.toLocaleString('fr-FR')} CFA
-                </span>
+              {/* Estimation livraison */}
+              <DeliveryQuote
+                cartItems={items.map(item => ({ id: item.id, quantity: item.quantity }))}
+                onDeliveryCostChange={setDeliveryCost}
+              />
+
+              <div className="space-y-1">
+                <div className="flex justify-between items-center text-sm text-gray-600">
+                  <span>Sous-total:</span>
+                  <span>{totalAmount.toLocaleString('fr-FR')} CFA</span>
+                </div>
+                {deliveryCost > 0 && (
+                  <div className="flex justify-between items-center text-sm text-gray-600">
+                    <span>Livraison:</span>
+                    <span>{deliveryCost.toLocaleString('fr-FR')} CFA</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center pt-1 border-t">
+                  <span className="text-lg font-semibold">Total:</span>
+                  <span className="text-lg font-bold text-custom-blue">
+                    {(totalAmount + deliveryCost).toLocaleString('fr-FR')} CFA
+                  </span>
+                </div>
               </div>
-              
+
               <div className="space-y-2">
-                <button 
+                <button
                   onClick={() => setIsOrderModalOpen(true)}
                   className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
                 >

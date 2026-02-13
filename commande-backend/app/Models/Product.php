@@ -19,15 +19,34 @@ class Product extends Model
         'category_id',
         'subcategory_id',
         'is_active',
-        'status'
+        'status',
+        'supplier_company',
+        'supplier_phone',
+        'supplier_address',
+        'weight_kg',
+        'length_cm',
+        'width_cm',
+        'height_cm',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'images' => 'array',
         'is_active' => 'boolean',
-        'status' => 'array'
+        'status' => 'array',
+        'weight_kg' => 'decimal:2',
+        'length_cm' => 'decimal:2',
+        'width_cm' => 'decimal:2',
+        'height_cm' => 'decimal:2',
     ];
+
+    public function getVolumeM3(): float
+    {
+        if ($this->length_cm && $this->width_cm && $this->height_cm) {
+            return ($this->length_cm * $this->width_cm * $this->height_cm) / 1000000;
+        }
+        return 0;
+    }
 
     public function vendor()
     {

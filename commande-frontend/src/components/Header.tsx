@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Search, ShoppingCart, User, Heart, MessageCircle, Menu, X, LogOut, UserCheck, Package } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import OrdersModal from './OrdersModal';
@@ -71,20 +72,11 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
         ? 'bg-white/95 backdrop-blur-md shadow-xl border-b border-gray-200/50'
         : 'bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 shadow-lg'
     }`}>
-      {/* Top banner */}
-      <div className={`${isScrolled ? 'hidden' : 'block'} bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center py-2 text-sm font-medium`}>
-        <div className="flex items-center justify-center gap-2">
-          <span className="animate-pulse">🚚</span>
-          Livraison gratuite pour les commandes de plus de 50 000 CFA
-          <span className="animate-pulse">✨</span>
-        </div>
-      </div>
-
       {/* Main header */}
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
-          <div className="flex items-center gap-3 min-w-fit">
+          <Link href="/" className="flex items-center gap-3 min-w-fit">
             <div className="relative group">
               <img
                 src="/image/logo.png"
@@ -115,7 +107,7 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onSearch, onShowLogin, o
                 } group-hover:w-full transition-all duration-500 ease-out`}></div>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Search bar - Desktop only */}
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl">

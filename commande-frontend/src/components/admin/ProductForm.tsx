@@ -33,7 +33,14 @@ export default function ProductForm({
     images: [],
     is_active: true,
     stock: 0,
-    status: []
+    status: [],
+    supplier_company: '',
+    supplier_phone: '',
+    supplier_address: '',
+    weight_kg: undefined,
+    length_cm: undefined,
+    width_cm: undefined,
+    height_cm: undefined,
   });
 
   const [subcategories, setSubcategories] = useState<AdminSubcategory[]>([]);
@@ -63,7 +70,14 @@ export default function ProductForm({
         images: product.images?.map(img => getFullImageUrl(img)) || [],
         is_active: product.is_active,
         stock: product.stock,
-        status: product.status || []
+        status: product.status || [],
+        supplier_company: product.supplier_company || '',
+        supplier_phone: product.supplier_phone || '',
+        supplier_address: product.supplier_address || '',
+        weight_kg: product.weight_kg || undefined,
+        length_cm: product.length_cm || undefined,
+        width_cm: product.width_cm || undefined,
+        height_cm: product.height_cm || undefined,
       });
 
       // Charger les sous-catégories si une catégorie est sélectionnée
@@ -370,6 +384,135 @@ export default function ProductForm({
                 </label>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Provenance du produit */}
+        {!useVendorService && (
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Provenance du produit</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label htmlFor="supplier_company" className="block text-sm font-medium text-gray-700 mb-2">
+                  Entreprise fournisseur
+                </label>
+                <input
+                  type="text"
+                  id="supplier_company"
+                  name="supplier_company"
+                  value={formData.supplier_company || ''}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Nom de l'entreprise"
+                  disabled={isLoading}
+                />
+              </div>
+              <div>
+                <label htmlFor="supplier_phone" className="block text-sm font-medium text-gray-700 mb-2">
+                  Telephone fournisseur
+                </label>
+                <input
+                  type="text"
+                  id="supplier_phone"
+                  name="supplier_phone"
+                  value={formData.supplier_phone || ''}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="+227 XX XX XX XX"
+                  disabled={isLoading}
+                />
+              </div>
+              <div>
+                <label htmlFor="supplier_address" className="block text-sm font-medium text-gray-700 mb-2">
+                  Adresse fournisseur
+                </label>
+                <input
+                  type="text"
+                  id="supplier_address"
+                  name="supplier_address"
+                  value={formData.supplier_address || ''}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Adresse du fournisseur"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Dimensions du produit */}
+        <div className="border-t pt-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Dimensions du produit</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <label htmlFor="weight_kg" className="block text-sm font-medium text-gray-700 mb-2">
+                Poids (kg)
+              </label>
+              <input
+                type="number"
+                id="weight_kg"
+                name="weight_kg"
+                value={formData.weight_kg ?? ''}
+                onChange={handleChange}
+                step="0.01"
+                min="0"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="0.00"
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <label htmlFor="length_cm" className="block text-sm font-medium text-gray-700 mb-2">
+                Longueur (cm)
+              </label>
+              <input
+                type="number"
+                id="length_cm"
+                name="length_cm"
+                value={formData.length_cm ?? ''}
+                onChange={handleChange}
+                step="0.01"
+                min="0"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="0.00"
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <label htmlFor="width_cm" className="block text-sm font-medium text-gray-700 mb-2">
+                Largeur (cm)
+              </label>
+              <input
+                type="number"
+                id="width_cm"
+                name="width_cm"
+                value={formData.width_cm ?? ''}
+                onChange={handleChange}
+                step="0.01"
+                min="0"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="0.00"
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <label htmlFor="height_cm" className="block text-sm font-medium text-gray-700 mb-2">
+                Hauteur (cm)
+              </label>
+              <input
+                type="number"
+                id="height_cm"
+                name="height_cm"
+                value={formData.height_cm ?? ''}
+                onChange={handleChange}
+                step="0.01"
+                min="0"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="0.00"
+                disabled={isLoading}
+              />
+            </div>
           </div>
         </div>
 

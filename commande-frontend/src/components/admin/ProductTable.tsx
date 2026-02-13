@@ -10,6 +10,7 @@ interface ProductTableProps {
   onDelete: (id: number) => void;
   onStatusChange: (id: number, isActive: boolean) => void;
   isLoading?: boolean;
+  showProvenance?: boolean;
 }
 
 export default function ProductTable({
@@ -17,7 +18,8 @@ export default function ProductTable({
   onEdit,
   onDelete,
   onStatusChange,
-  isLoading = false
+  isLoading = false,
+  showProvenance = false
 }: ProductTableProps) {
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -98,6 +100,11 @@ export default function ProductTable({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Vedette
               </th>
+              {showProvenance && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Provenance
+                </th>
+              )}
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Créé le
               </th>
@@ -188,6 +195,20 @@ export default function ProductTable({
                     <span className="text-gray-400 text-sm">-</span>
                   )}
                 </td>
+                {showProvenance && (
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {product.supplier_company ? (
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{product.supplier_company}</div>
+                        {product.supplier_phone && (
+                          <div className="text-xs text-gray-500">{product.supplier_phone}</div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">-</span>
+                    )}
+                  </td>
+                )}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {formatDate(product.created_at)}
                 </td>

@@ -100,6 +100,61 @@ class AuthController extends Controller
         ], 201);
     }
 
+    public function registerPartner(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+            'business_name' => 'required|string|max:255',
+            'business_phone' => 'required|string|max:20',
+            'business_address' => 'required|string|max:500',
+            'city_id' => 'required|exists:cities,id',
+            'neighborhood_id' => 'required|exists:neighborhoods,id',
+            'id_document' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 400);
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'partner',
+        ]);
+
+        // Create partner profile
+        $user->partner()->create([
+            'business_name' => $request->business_name,
+            'business_phone' => $request->business_phone,
+            'business_address' => $request->business_address,
+            'city_id' => $request->city_id,
+            'neighborhood_id' => $request->neighborhood_id,
+            'id_document' => $request->id_document,
+            'status' => 'pending',
+        ]);
+
+        $token = JWTAuth::fromUser($user);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Partner registration successful. Your account is pending approval.',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ],
+            'token' => $token
+        ], 201);
+    }
+
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -199,6 +254,18 @@ class AuthController extends Controller
             $userData['address'] = $user->address;
             $userData['approved_at'] = $user->approved_at;
             $userData['rejection_reason'] = $user->rejection_reason;
+        }
+
+        // Ajouter les informations partenaire si applicable
+        if ($user->isPartner()) {
+            $partner = $user->partner;
+            if ($partner) {
+                $userData['partner_status'] = $partner->status;
+                $userData['business_name'] = $partner->business_name;
+                $userData['business_phone'] = $partner->business_phone;
+                $userData['city_id'] = $partner->city_id;
+                $userData['neighborhood_id'] = $partner->neighborhood_id;
+            }
         }
 
         return response()->json([

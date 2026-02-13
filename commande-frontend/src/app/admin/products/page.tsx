@@ -285,6 +285,7 @@ export default function ProductsPage() {
           onDelete={handleDeleteProduct}
           onStatusChange={handleStatusChange}
           isLoading={loading}
+          showProvenance={true}
         />
 
         {/* Pagination */}

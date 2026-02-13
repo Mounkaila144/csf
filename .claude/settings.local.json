@@ -1,11 +1,25 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:commandesansfrontiere.com)",
-      "Bash(cat:*)",
-      "Bash(php artisan:*)"
+      "Bash",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "Task",
+      "NotebookEdit",
+      "mcp__ide__getDiagnostics",
+      "mcp__chrome-devtools__*"
     ],
-    "deny": [],
-    "ask": []
+    "deny": []
+  },
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["@anthropic/claude-mcp-devtools@latest"]
+    }
   }
 }

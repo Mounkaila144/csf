@@ -19,6 +19,7 @@ export interface Order {
   user_id: number;
   total_amount: number;
   status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  payment_status?: 'unpaid' | 'pending_validation' | 'paid' | 'refunded';
   shipping_address: string;
   billing_address?: string;
   phone: string;
@@ -86,6 +87,14 @@ class OrderService {
       body: JSON.stringify(orderData),
     });
     return data.data;
+  }
+
+  async validatePayment(orderId: number, paymentCode: string): Promise<{ message: string; payment: unknown }> {
+    const data = await this.makeRequest(`/orders/${orderId}/validate-payment`, {
+      method: 'POST',
+      body: JSON.stringify({ payment_code: paymentCode }),
+    });
+    return data;
   }
 }
 
